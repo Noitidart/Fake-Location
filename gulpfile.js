@@ -88,7 +88,11 @@ gulp.task('import-3rdjs', ['copy'], function() {
 	console.log('dest:', dest);
 
     return gulp.src([
-			'node_modules/babel-polyfill/dist/polyfill.min.js'
+			'node_modules/babel-polyfill/dist/polyfill.min.js',
+			'node_modules/react/dist/react-with-addons.min.js',
+			'node_modules/react-dom/dist/react-dom.min.js',
+			'node_modules/redux/dist/redux.min.js',
+			'node_modules/react-redux/dist/react-redux.min.js'
         ])
         .pipe(gulp.dest(dest));
 });

@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "description": "All my scripts are now babelified",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "react-redux": "^4.4.5",
+    "redux": "^3.6.0"
+  },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.16.0",
     "babel-polyfill": "^6.16.0",

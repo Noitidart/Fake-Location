@@ -294,6 +294,46 @@ function onBrowserActionClicked() {
 }
 // end - browseraction
 
+async function fetchData(aArg={}) {
+	let { hydrant, nub } = aArg;
+
+	let data = {};
+
+	let basketmain = new PromiseBasket;
+
+	if (nub) data.nub = nub;
+
+	if (hydrant) {
+		if (hydrant.store) {
+			basketmain.add(
+				storageCall('local', 'get', Object.keys(hydrant.store)),
+				storeds => data.store = storeds
+			);
+		}
+	}
+
+	await basketmain.run();
+
+	return data;
+}
+
+class PromiseBasket {
+	constructor() {
+		this.promises = [];
+		this.thens = [];
+	}
+	add(aAsync, onThen) {
+		// onThen is optional
+		this.promises.push(aAsync);
+		this.thens.push(onThen);
+	}
+	async run() {
+		let results = await Promise.all(this.promises);
+		results.forEach((r, i)=>this.thens[i] ? this.thens[i](r) : null);
+		return results;
+	}
+}
+
 // start - polyfill for android
 function addTab(url) {
 	if (chrome.tabs && chrome.tabs.create) {
@@ -313,6 +353,7 @@ function reuseElseAddTab(url) {
 var _storagecall_pendingset = {};
 var _storagecall_callid = 1;
 function storageCall(aArea, aAction, aKeys, aOptions) {
+	if (typeof(aArea) == 'object') ({ aArea, aAction, aKeys, aOptions } = aArea);
 	// because storage can fail, i created this, which goes until it doesnt fail
 
 	// aAction - string;enum[set,get,clear,remove]
