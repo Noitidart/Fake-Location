@@ -1,4 +1,4 @@
-var core  = {
+var nub  = {
 	self: {
 		id: chrome.runtime.id,
 		version: chrome.runtime.getManifest().version,
@@ -15,7 +15,7 @@ var core  = {
 		pages: 'pages/',
 		scripts: 'scripts/',
 		styles: 'styles/',
-		// non-webext paths - SPECIAL prefixed with underscore - means it is from chrome://core.addon.id/content/
+		// non-webext paths - SPECIAL prefixed with underscore - means it is from chrome://nub.addon.id/content/
 		// _exe: 'exe/',
 		// chrome path versions set after this block
 		chrome: {}
@@ -39,19 +39,19 @@ var core  = {
 	}
 };
 
-// set chrome:// paths in core.path
-for (var pathkey in core.path) {
+// set chrome:// paths in nub.path
+for (var pathkey in nub.path) {
 	if (pathkey == 'chrome') continue;
-	var prefix = 'chrome://' + core.self.chromemanifestkey + '/content/';
+	var prefix = 'chrome://' + nub.self.chromemanifestkey + '/content/';
 	var suffix;
 	if (pathkey[0] == '_') pathkey = pathkey.substr(1);
-	if (core.path['_' + pathkey]) {
+	if (nub.path['_' + pathkey]) {
 		// its a chrome path only
-		suffix = core.path['_' + pathkey];
+		suffix = nub.path['_' + pathkey];
 	} else {
-		suffix = 'webextension/' + core.path[pathkey];
+		suffix = 'webextension/' + nub.path[pathkey];
 	}
-	core.path.chrome[pathkey] = prefix + suffix;
+	nub.path.chrome[pathkey] = prefix + suffix;
 }
 
 var gExeComm;
@@ -78,15 +78,15 @@ function preinit(aIsRetry) {
 			data: object - only if EXE_MISMATCH - keys: exeversion
 		}
 	*/
-	// give bootstrap core
-	callInBootstrap('sendCore', { core:core });
+	// give bootstrap nub
+	callInBootstrap('sendNub', { nub:nub });
 
 	// fetch storage
 	promiseallarr.push(new Promise(function(resolve, reject) {
-		storageCall('local', 'get', Object.keys(core.store))
+		storageCall('local', 'get', Object.keys(nub.store))
 		.then(function(storeds) {
 			for (var key in storeds) {
-				core.store[key] = storeds[key];
+				nub.store[key] = storeds[key];
 			}
 			resolve();
 		})
@@ -104,14 +104,14 @@ function preinit(aIsRetry) {
 
 		var gotPlat = function(platinfo) {
 			console.log('platinfo:', platinfo);
-			core.platform = platinfo;
+			nub.platform = platinfo;
 
 			resolve('ok platinfo got')
 			// startNativeHost();
 		};
 
 		// var startNativeHost = function() {
-		// 	if (core.platform.os == 'android') {
+		// 	if (nub.platform.os == 'android') {
 		// 		callInBootstrap('startupMainworker', { path:'chrome://profilist/content/webextension/scripts/mainworker.js' });
 		// 		// worker doesnt start till first call, so just assume it connected
 		// 		verifyNativeHost();
@@ -139,11 +139,11 @@ function preinit(aIsRetry) {
 		// 		reject(aRejectObj);
 		// 	} else {
 		// 		// verifies the native host version matches that of the extension
-		// 		if (core.platform.os == 'android') {
+		// 		if (nub.platform.os == 'android') {
 		// 			resolve('ok platinfo got AND nativehost (mainworker) started up');
 		// 		} else {
 		// 			callInExe('getExeVersion', undefined, function(exeversion) {
-		// 				var extversion = core.self.version;
+		// 				var extversion = nub.self.version;
 		// 				if (exeversion === extversion) {
 		// 					resolve('ok platinfo got AND exe started up AND exe version matches extension version');
 		// 				} else {
@@ -175,7 +175,7 @@ function preinit(aIsRetry) {
 				switch (err.reason) {
 					// case 'EXE_CONNECT':
 					// case 'EXE_MISMATCH':
-					// 		if (core.browser.name == 'Firefox')
+					// 		if (nub.browser.name == 'Firefox')
 					// 			doRetry();
 					// 		else
 					// 			displayError();
@@ -188,7 +188,7 @@ function preinit(aIsRetry) {
 
 		var doRetry = function() {
 			// if (err.reason.indexOf('EXE_') === 0) {
-			// 	callInBootstrap('installNativeMessaging', { nativemessaging:core.nativemessaging, path:core.path }, function(aInstallFailed) {
+			// 	callInBootstrap('installNativeMessaging', { nativemessaging:nub.nativemessaging, path:nub.path }, function(aInstallFailed) {
 			// 		if (!aInstallFailed)
 			// 			setTimeout(preinit.bind(null, true), 0); // so it gets out of this catch scope
 			// 		else
@@ -215,7 +215,7 @@ function preinit(aIsRetry) {
 				// case 'EXE_MISMATCH':
 				//
 				// 		// build howtofixstr
-				// 		var extversion = core.self.version;
+				// 		var extversion = nub.self.version;
 				// 		var exeversion = err.data.exeversion;
 				// 		console.log('going to isSemVer', extversion, exeversion);
 				// 		console.log('semver:', isSemVer(extversion, '>' + exeversion));
@@ -244,27 +244,27 @@ function preinit(aIsRetry) {
 }
 
 function init() {
-	// after receiving core
-	console.log('in init, core:', core);
+	// after receiving nub
+	console.log('in init, nub:', nub);
 
 	startupBrowserAction();
 
-	var lastversion = core.store.mem_lastversion;
+	var lastversion = nub.store.mem_lastversion;
 	if (lastversion === '-1') {
 		// installed / first run
 		console.error('FIRST RUN');
-		storageCall('local', 'set', { mem_lastversion:core.self.version }).then(a=>console.log('set, core.store:', core.store));
-	} else if (lastversion !== core.self.version) {
+		storageCall('local', 'set', { mem_lastversion:nub.self.version }).then(a=>console.log('set, nub.store:', nub.store));
+	} else if (lastversion !== nub.self.version) {
 		// downgrade or upgrade
-		if (isSemVer(core.self.version, '>' + lastversion)) {
+		if (isSemVer(nub.self.version, '>' + lastversion)) {
 			// upgrade
 			console.error('UPDGRADE');
 		} else {
 			// downgrade
 			console.error('DOWNGRADE');
 		}
-		storageCall('local', 'set', { mem_lastversion:core.self.version }).then(a=>console.log('set, core.store:', core.store));
-	} // else if (lastversion === core.self.version) { } // browser startup OR enabled after having disabled
+		storageCall('local', 'set', { mem_lastversion:nub.self.version }).then(a=>console.log('set, nub.store:', nub.store));
+	} // else if (lastversion === nub.self.version) { } // browser startup OR enabled after having disabled
 }
 
 function uninit() {
@@ -277,7 +277,7 @@ function uninit() {
 // start - browseraction
 function startupBrowserAction() {
 	// browser_action/chrome.browserAction is not supported on Android, so tell bootstrap to inject action item to NativeWindow.menu
-	if (core.platform.os == 'android') {
+	if (nub.platform.os == 'android') {
 		callInBootstrap('startupAndroid', {
 			browseraction: {
 				title: chrome.i18n.getMessage('browseraction_title'),
@@ -290,7 +290,7 @@ function startupBrowserAction() {
 }
 function onBrowserActionClicked() {
 	console.log('opening menu.html now');
-	addTab(core.path.pages + 'app.html');
+	addTab(nub.path.pages + 'app.html');
 }
 // end - browseraction
 
@@ -393,10 +393,10 @@ function storageCall(aArea, aAction, aKeys, aOptions) {
 								delete _storagecall_pendingset[setkey];
 							}
 
-							// SPECIAL - udpate core.store
-							if (typeof(core) == 'object' && core.store) {
+							// SPECIAL - udpate nub.store
+							if (typeof(nub) == 'object' && nub.store) {
 								for (var setkey in aKeys) {
-									core.store[setkey] = aKeys[setkey];
+									nub.store[setkey] = aKeys[setkey];
 								}
 							}
 

@@ -4,7 +4,7 @@ Cu.import('resource://gre/modules/osfile.jsm');
 Cu.import('resource://gre/modules/Services.jsm');
 
 // Globals
-var core = { // brought over from background.js if needed
+var nub = { // brought over from background.js if needed
 	path: {
 		chrome: {
 			scripts: 'chrome://fake-location/content/webextension/scripts/'
@@ -31,8 +31,8 @@ function uninstall(aData, aReason) {
 
 function startup(aData, aReason) {
 
-	// Services.scriptloader.loadSubScript(core.path.chrome.scripts + '3rd/polyfill.min.js');
-	Services.scriptloader.loadSubScript(core.path.chrome.scripts + '3rd/comm/webext.js');
+	Services.scriptloader.loadSubScript(nub.path.chrome.scripts + '3rd/polyfill.min.js');
+	Services.scriptloader.loadSubScript(nub.path.chrome.scripts + '3rd/comm/webext.js');
 
 	var promiseallarr = [];
 
@@ -199,25 +199,25 @@ var windowListenerAndroid = {
 // 	// `winregistry_path` is undefined if not windows
 // 	// os_sname is win/mac/nix
 //
-// 	// core.nativemessaging.manifest_json = { // this is setup in background.js
+// 	// nub.nativemessaging.manifest_json = { // this is setup in background.js
 // 	//   'name': 'profilist', // i use this as child entry for windows registry entry, so make sure this name is compatible with injection into windows registry link39191
 // 	//   'description': 'Platform helper for Profilist',
 // 	//   'path': undefined, // set below to `exe_path`,
 // 	//   'type': 'stdio',
-// 	//   'allowed_extensions': [ core.self.id ]
+// 	//   'allowed_extensions': [ nub.self.id ]
 // 	// };
 //
 // 	var exe_name;
 // 	var sname = OS.Constants.Sys.Name.toLowerCase(); // stands for "simplified name". different from `mname`
 // 	if (sname.startsWith('win')) {
 // 		sname = 'win';
-// 		exe_name = core.nativemessaging.manifest_json.name + '.exe';
+// 		exe_name = nub.nativemessaging.manifest_json.name + '.exe';
 // 	} else if (sname == 'darwin') {
 // 		sname = 'mac';
-// 		exe_name = core.nativemessaging.manifest_json.name;
+// 		exe_name = nub.nativemessaging.manifest_json.name;
 // 	} else {
 // 		sname = 'nix';
-// 		exe_name = core.nativemessaging.manifest_json.name;
+// 		exe_name = nub.nativemessaging.manifest_json.name;
 // 	}
 //
 // 	var exe_path;
@@ -225,16 +225,16 @@ var windowListenerAndroid = {
 //
 // 	var exe_from = OS.Constants.Path.userApplicationDataDir; // dir that exists for sure in subpath of `exe_path`. where to `makeDir` from for exe
 //
-// 	// update core.nativemessaging.manifest_json
-// 	core.nativemessaging.manifest_json.path = exe_path;
-// 	core.nativemessaging.manifest_json.description += ' for ' + sname;
+// 	// update nub.nativemessaging.manifest_json
+// 	nub.nativemessaging.manifest_json.path = exe_path;
+// 	nub.nativemessaging.manifest_json.description += ' for ' + sname;
 //
 // 	var exemanifest_path;
 // 	var exemanifest_from; // dir that exists for sure in subpath of `exemanifest_path`. where to `makeDir` from for exe
 // 	switch (sname) {
 // 		case 'win':
-// 				// exemanifest_path = OS.Path.join(core.path.storage, 'profilist.json');
-// 				// exemanifest_from = core.path.profileDir;
+// 				// exemanifest_path = OS.Path.join(nub.path.storage, 'profilist.json');
+// 				// exemanifest_from = nub.path.profileDir;
 // 				exemanifest_path = OS.Path.join(OS.Constants.Path.userApplicationDataDir, 'extension-exes', 'profilist.json');
 // 				exemanifest_from = OS.Constants.Path.userApplicationDataDir;
 // 			break;
@@ -253,16 +253,16 @@ var windowListenerAndroid = {
 // 		winregistry_path = 'SOFTWARE\\Mozilla\\NativeMessagingHosts';
 // 	}
 //
-// 	return { os_sname:sname, exe_path, exe_from, exe_name, exemanifest_path, exemanifest_from, exemanifest_json:core.nativemessaging.manifest_json, winregistry_path };
+// 	return { os_sname:sname, exe_path, exe_from, exe_name, exemanifest_path, exemanifest_from, exemanifest_json:nub.nativemessaging.manifest_json, winregistry_path };
 //
 // }
 //
 // function installNativeMessaging(aArg) {
-// 	// it should already be there due to `sendCore`, but just to make it not reliant on globals
-// 	core.nativemessaging = aArg.nativemessaging;
-// 	core.path = aArg.path;
+// 	// it should already be there due to `sendNub`, but just to make it not reliant on globals
+// 	nub.nativemessaging = aArg.nativemessaging;
+// 	nub.path = aArg.path;
 //
-// 	Services.prefs.setCharPref('extensions.@profilist.namsg', core.nativemessaging.manifest_json.name);
+// 	Services.prefs.setCharPref('extensions.@profilist.namsg', nub.nativemessaging.manifest_json.name);
 //
 // 	var { exe_path, exe_from, exe_name, exemanifest_path, exemanifest_from, exemanifest_json, winregistry_path, os_sname } = getNativeMessagingInfo();
 //
@@ -273,8 +273,8 @@ var windowListenerAndroid = {
 // 		OS.File.makeDir(OS.Path.dirname(exe_path), { from:exe_from })
 // 		.then( dirmade => {
 // 			var xhr = Cc['@mozilla.org/xmlextras/xmlhttprequest;1'].createInstance(Ci.nsIXMLHttpRequest);
-// 			console.log(core.path.chrome.exe + os_sname + '/' + exe_name);
-// 			xhr.open('GET', core.path.chrome.exe + os_sname + '/' + exe_name, false);
+// 			console.log(nub.path.chrome.exe + os_sname + '/' + exe_name);
+// 			xhr.open('GET', nub.path.chrome.exe + os_sname + '/' + exe_name, false);
 // 			xhr.responseType = 'arraybuffer';
 // 			xhr.send();
 //
@@ -330,7 +330,7 @@ var windowListenerAndroid = {
 // 	}
 //
 // 	Services.prefs.clearUserPref('extensions.@profilist.namsg');
-// 	core.nativemessaging = { manifest_json:{name:exemanifest_name} };
+// 	nub.nativemessaging = { manifest_json:{name:exemanifest_name} };
 //
 // 	var { exe_path, exe_from, exe_name, exemanifest_path, exemanifest_from, exemanifest_json, winregistry_path } = getNativeMessagingInfo();
 //
@@ -370,17 +370,17 @@ function showSystemAlert(aArg) {
 
 	Services.prompt.alert(Services.wm.getMostRecentWindow('navigator:browser'), title, body);
 }
-function sendCore(aArg, aReportProgress, aComm) {
-	core = aArg.core;
+function sendNub(aArg, aReportProgress, aComm) {
+	nub = aArg.nub;
 }
 function setApplyBackgroundUpdates(aNewApplyBackgroundUpdates) {
 	// 0 - off, 1 - respect global setting, 2 - on
-	AddonManager.getAddonByID(core.self.id, addon =>
+	AddonManager.getAddonByID(nub.self.id, addon =>
 		addon.applyBackgroundUpdates = aNewApplyBackgroundUpdates
 	);
 }
 
-function getAddonInfo(aAddonId=core.self.id) {
+function getAddonInfo(aAddonId=nub.self.id) {
 	var deferredmain_getaddoninfo = new Deferred();
 	AddonManager.getAddonByID(aAddonId, addon =>
 		deferredmain_getaddoninfo.resolve({

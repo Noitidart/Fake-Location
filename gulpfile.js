@@ -14,6 +14,7 @@ var gulpif = require('gulp-if');
 var gulp_src_ordered = require('gulp-src-ordered-globs'); // http://stackoverflow.com/a/40206149/1828637
 var jshint = require('gulp-jshint');
 var replace = require('gulp-replace');
+var zip = require('gulp-zip');
 
 // Command line options
 var options  = { // defaults
@@ -64,7 +65,7 @@ gulp.task('copy', ['clean'], function() {
 
 gulp.task('import-3rdjs', ['copy'], function() {
 	// bring in babel-polyfill to 3rd party directory - determined by clarg txtype
-	 
+
 	var dest;
 	// switch (options.txtype) {
 	// 	case 'fxhyb':
@@ -85,7 +86,7 @@ gulp.task('import-3rdjs', ['copy'], function() {
 		throw new Error('dont know where to import 3rd party scripts too!');
 	}
 	console.log('dest:', dest);
-	
+
     return gulp.src([
 			'node_modules/babel-polyfill/dist/polyfill.min.js'
         ])
@@ -93,7 +94,7 @@ gulp.task('import-3rdjs', ['copy'], function() {
 });
 
 gulp.task('initial-tx-js', ['import-3rdjs'], function() {
-	return gulp.start('tx-js');
+	return gulp.start('tx-then-xpi');
 });
 // end async-proc9939
 
@@ -105,13 +106,25 @@ gulp.task('tx-js', function() {
 		.pipe(babel())
 		.pipe(gulp.dest('dist'));
 });
+
+gulp.task('tx-then-xpi', ['tx-js'], function() {
+	return gulp.src('dist/**/*')
+        .pipe(zip('dist.xpi', { compress:false }))
+        .pipe(gulp.dest('./'));
+});
+
+gulp.task('xpi', function() {
+	return gulp.src('dist/**/*')
+        .pipe(zip('dist.xpi', { compress:false }))
+        .pipe(gulp.dest('./'));
+});
 // end - standalone3888
 
 
 gulp.task('default', ['initial-tx-js']); // copy-3rdjs triggers tx-js
 gulp.task('watch', ['default'], function() {
-	console.log('NOTE: wait for tx-js to finish, or it may have already finished. as that does the initial js copy');
-	var watcher = gulp.watch('src/**/*.js', ['tx-js']);
+	console.log('NOTE: wait for tx-then-xpi to finish, or it may have already finished. as that does the initial js copy');
+	var watcher = gulp.watch('src/**/*.js', ['tx-then-xpi']);
 	watcher.on('change', function(event) {
 		console.log('JS file at path "' + event.path + '" was ' + event.type + ', running tx-js...');
 	});
