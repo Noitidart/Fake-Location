@@ -1,0 +1,67 @@
+{
+	"bootstrap_languagecode": {
+		"message": "en",
+		"description": "Please go to http://usrz.github.io/bootstrap-languages/ and then find the code for your lanaguge. This may not be the same as the \"ISO Language Code/Tag/\". For instance, for the ISO Code/Tag of \"en-US\" the Bootstrap Code/Tag is \"en\""
+	},
+	"bidi_dir": {
+		"message": "ltr",
+		"description": "The text direction for the current locale, either \"ltr\" for left-to-right languages such as English or \"rtl\" for right-to-left languages such as Japanese."
+	},
+	"bidi_reversed_dir": {
+		"message": "rtl",
+		"description": "If the `bidi_dir` is \"ltr\", then this is \"rtl\"; otherwise, it's \"ltr\"."
+	},
+	"bidi_start_edge": {
+		"message": "left",
+		"description": "If the `bidi_dir` is \"ltr\", then this is \"left\"; otherwise, it's \"right\"."
+	},
+	"bidi_end_edge": {
+		"message": "right",
+		"description": "If the `bidi_dir` is \"ltr\", then this is \"right\"; otherwise, it's \"left\"."
+	},
+
+	"addon_name": {
+		"message": "Fake Location"
+	},
+	"addon_desc": {
+		"message": "Tricks geolocation service."
+	},
+	"addon_version_short": {
+		"message": "v$NUMBER$",
+		"placeholders": {
+			"NUMBER": {
+				"content": "$1",
+				"example": "2.3"
+			}
+		}
+	},
+	"addon_version_long": {
+		"message": "Version $NUMBER$",
+		"placeholders": {
+			"NUMBER": {
+				"content": "$1",
+				"example": "2.3"
+			}
+		}
+	},
+
+	"browseraction_title": {
+		"message": "Fake Location"
+	},
+
+	"startupfailed_title": {
+		"message": "Fake Location - Critical Error"
+	},
+	"startupfailed_body": {
+		"message": "Fake Location cannot be used because it failed to startup.\n\n$REASON$",
+		"placeholders": {
+			"REASON": {
+				"content": "$1",
+				"example": "the startupfailed_ stuff below"
+			}
+		}
+	},
+	"startupfailed_unknown": {
+		"message": "The error is unknown. Try checking the \"Browser Console\" for more details."
+	}
+}
