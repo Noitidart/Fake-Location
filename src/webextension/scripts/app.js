@@ -269,8 +269,8 @@ var Form = React.createClass({
 var FormContainer = ReactRedux.connect(
 	function(state, ownProps) {
 		return {
-			lat: state.prefs.pref_lat,
-			lng: state.prefs.pref_lng,
+			lat: state.prefs.pref_lat || '0',
+			lng: state.prefs.pref_lng || '0',
 			isenabled: state.xprefs['geo.provider.testing']
 		}
 	},
@@ -279,9 +279,12 @@ var FormContainer = ReactRedux.connect(
 			enable: () => {
 				let lat = document.getElementById('lat').value;
 				let lng = document.getElementById('lng').value;
-				let serveruri = 'https://fake-location.sundayschoolonline.org/?lat=' + lat + '&lng=' + lng;
+
+				let geojson = { location:{ lat, lng }, accuracy:4000, altitude:100 };
+				let geouri = 'data:,' + encodeURIComponent(JSON.stringify(geojson));
+
 				let prefvals = {'pref_lat':lat,'pref_lng':lng};
-				let xprefvals = {'geo.wifi.uri':serveruri,'geo.provider.testing':true};
+				let xprefvals = {'geo.wifi.uri':geouri,'geo.provider.testing':true};
 				callInBootstrap('setXPrefs', { xprefs:xprefvals } );
 				callInBackground('storageCall', { aArea:'local',aAction:'set',aKeys:prefvals })
 				dispatch(setPrefs(prefvals));
