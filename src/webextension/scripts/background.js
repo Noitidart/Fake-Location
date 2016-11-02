@@ -338,7 +338,7 @@ function setFaking(aNewStatus) {
 
 				if (aNewStatus) {
 					let { pref_lat:lat, pref_lng:lng } = nub.stg;
-					let geojson = { location:{ lat, lng }, accuracy:4000, altitude:100 };
+					let geojson = { location:{ lat, lng }, accuracy:4000 };
 					let geouri = 'data:,' + encodeURIComponent(JSON.stringify(geojson));
 					let xprefvals = { 'geo.wifi.uri':geouri, 'geo.provider.testing':true };
 					callInBootstrap('setXPrefs', { namevals:xprefvals } );
