@@ -253,7 +253,8 @@ function init() {
 	if (lastversion === '-1') {
 		// installed / first run
 		console.error('FIRST RUN');
-		storageCall('local', 'set', { mem_lastversion:nub.self.version }).then(a=>console.log('set, nub.store:', nub.store));
+		storageCall('local', 'set', { mem_lastversion:nub.self.version })
+		.then(a=>console.log('set, nub.store:', nub.store));
 	} else if (lastversion !== nub.self.version) {
 		// downgrade or upgrade
 		if (isSemVer(nub.self.version, '>' + lastversion)) {
@@ -263,7 +264,8 @@ function init() {
 			// downgrade
 			console.error('DOWNGRADE');
 		}
-		storageCall('local', 'set', { mem_lastversion:nub.self.version }).then(a=>console.log('set, nub.store:', nub.store));
+		storageCall('local', 'set', { mem_lastversion:nub.self.version })
+		.then(a=>console.log('set, nub.store:', nub.store));
 	} // else if (lastversion === nub.self.version) { } // browser startup OR enabled after having disabled
 }
 
