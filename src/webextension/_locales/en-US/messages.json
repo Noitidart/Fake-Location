@@ -45,9 +45,9 @@
 		}
 	},
 
-	"browseraction_title": {
-		"message": "Fake Location"
-	},
+	"browseraction_title": { "message": "Fake Location" },
+	"browseraction_title_on": { "message": "Fake Location (ON)" },
+	"on": { "message": "On" },
 
 	"startupfailed_title": {
 		"message": "Fake Location - Critical Error"

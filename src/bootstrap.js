@@ -80,7 +80,7 @@ function startupAndroid(aArg) {
 	if (OS.Constants.Sys.Name != 'Android') return;
 
 	gStartedupAndroid = true;
-	gBrowserAction = aArg.browseraction;
+	if (aArg.browseraction) gBrowserAction = Object.assign(aArg.browseraction, {callback:onBrowserActionClicked});
 	windowListenerAndroid.register();
 }
 
@@ -96,14 +96,37 @@ function shutdownAndroid() {
 	}
 }
 
-function onBrowserActionClicked() {
-	callInBackground('onBrowserActionClicked');
-}
-
 function addTab(aArg, aReportProgress, aComm) {
 	var { url } = aArg;
 	var win = Services.wm.getMostRecentWindow('navigator:browser');
 	win.BrowserApp.addTab(url);
+}
+
+function onBrowserActionClicked() {
+	callInBackground('onBrowserActionClicked');
+}
+
+function browserActionUpdate(aArg) {
+	let updateobj = aArg;
+	// updateobj - object:
+		// name - string
+		// checked - boolean - if `checkable` is not set to `true` though, this will have no affect
+		// enabled - boolean
+		// visible - boolean
+		// checkable - boolean
+
+	if (OS.Constants.Sys.Name == 'Android') {
+		Object.assign(gBrowserAction, updateobj);
+
+		var l = gAndroidMenus.length;
+		for (var i=0; i<l; i++) {
+			var androidmenu = gAndroidMenus[i];
+			let { domwin, menuid } = androidmenu;
+			try { // wrap in try-catch because domwin might not exist if it was closed
+				domwin.NativeWindow.menu.update(menuid, updateobj);
+			} catch(ignore) {}
+		}
+	}
 }
 
 var windowListenerAndroid = {
@@ -161,11 +184,7 @@ var windowListenerAndroid = {
 			if (OS.Constants.Sys.Name == 'Android') {
                 // // android:insert_gui
 				if (aDOMWindow.NativeWindow && aDOMWindow.NativeWindow.menu) {
-					var menuid = aDOMWindow.NativeWindow.menu.add({
-						name: gBrowserAction.title,
-						// icon: gBrowserAction.iconpath,
-						callback: onBrowserActionClicked
-					});
+					var menuid = aDOMWindow.NativeWindow.menu.add(gBrowserAction);
 					gAndroidMenus.push({
 						domwin: aDOMWindow,
 						menuid

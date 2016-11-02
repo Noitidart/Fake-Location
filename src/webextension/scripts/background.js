@@ -270,6 +270,13 @@ function init() {
 		storageCall('local', 'set', { mem_lastversion:nub.self.version })
 		.then(a=>console.log('set, nub.stg:', nub.stg));
 	} // else if (lastversion === nub.self.version) { } // browser startup OR enabled after having disabled
+
+	// ensure `mem_faking` status is refelected
+	if (nub.stg.mem_faking) {
+		setFaking(true);
+	} else {
+		setFaking(false);
+	}
 }
 
 function uninit() {
@@ -285,11 +292,13 @@ function startupBrowserAction() {
 	if (nub.platform.os == 'android') {
 		callInBootstrap('startupAndroid', {
 			browseraction: {
-				title: chrome.i18n.getMessage('browseraction_title'),
-				iconpath: chrome.runtime.getURL('images/icon.svg')
+				name: chrome.i18n.getMessage('browseraction_title'),
+				// iconpath: chrome.runtime.getURL('images/icon.svg')
+				checkable: false
 			}
 		});
 	} else {
+		chrome.browserAction.setBadgeBackgroundColor({color:'#7DCE8D'});
 		chrome.browserAction.onClicked.addListener(onBrowserActionClicked);
 	}
 }
@@ -351,9 +360,36 @@ function setFaking(aNewStatus) {
 		default:
 			throw new Error(nub.browser.name + ' browser not supported!')
 	}
+
+	// set badge
+	if (nub.platform.os != 'android') {
+		if (aNewStatus) {
+			chrome.browserAction.setBadgeText({text:chrome.i18n.getMessage('on')});
+			browserActionSetTitle(chrome.i18n.getMessage('browseraction_title_on'));
+		} else {
+			chrome.browserAction.setBadgeText({text:chrome.i18n.getMessage('')});
+			browserActionSetTitle(chrome.i18n.getMessage('browseraction_title'));
+		}
+	} else {
+		if (aNewStatus) {
+			callInBootstrap('browserActionUpdate', { checked:true, checkable:true, name:chrome.i18n.getMessage('browseraction_title_on') });
+		} else {
+			callInBootstrap('browserActionUpdate', { checked:false, checkable:false, name:chrome.i18n.getMessage('browseraction_title') });
+		}
+	}
 }
 
 // start - polyfill for android
+function browserActionSetTitle(title) {
+	if (nub.platform.os != 'android') {
+		chrome.browserAction.setTitle({title});
+	} else {
+		callInBootstrap('update');
+	}
+}
+function browserActionSetBadgeText(text) {
+
+}
 function addTab(url) {
 	if (chrome.tabs && chrome.tabs.create) {
 		chrome.tabs.create({ url:url });
