@@ -5,7 +5,7 @@ var nub  = {
 		chromemanifestkey: 'fake-location'
 	},
 	browser: {
-		name: getBrowser().name,
+		name: getBrowser().name.toLowerCase(),
 		version: getBrowser().version
 	},
 	path: {
@@ -29,13 +29,16 @@ var nub  = {
 	// 	  allowed_extensions: [ chrome.runtime.id ]
 	// 	}
 	// },
-	store: {
+	stg: {
 		// defaults - keys that present in here during `preinit` are fetched on startup
 			// 3 types
 				// prefs are prefeixed with "pref_"
 				// mem are prefeixed with "mem_" - mem stands for extension specific "cookies"/"system memory"
 				// filesystem-like stuff is prefixied with "fs_"
-		mem_lastversion: '-1' // indicates not installed - the "last installed version"
+		mem_lastversion: '-1', // indicates not installed - the "last installed version"
+		mem_faking: false,
+		pref_lat: '0',
+		pref_lng: '0'
 	}
 };
 
@@ -73,7 +76,7 @@ function preinit(aIsRetry) {
 	/*
 	 promises in promiseallarr when get rejected, reject with:
 		{
-			reason: string;enum[STORE_CONNECT, EXE_CONNECT, EXE_MISMATCH]
+			reason: string;enum[STG_CONNECT, EXE_CONNECT, EXE_MISMATCH]
 			text: string - non-localized associated text to show - NOT formated text. this is something i would insert into the template shown
 			data: object - only if EXE_MISMATCH - keys: exeversion
 		}
@@ -83,10 +86,10 @@ function preinit(aIsRetry) {
 
 	// fetch storage
 	promiseallarr.push(new Promise(function(resolve, reject) {
-		storageCall('local', 'get', Object.keys(nub.store))
-		.then(function(storeds) {
-			for (var key in storeds) {
-				nub.store[key] = storeds[key];
+		storageCall('local', 'get', Object.keys(nub.stg))
+		.then(function(stgeds) {
+			for (var key in stgeds) {
+				nub.stg[key] = stgeds[key];
 			}
 			resolve();
 		})
@@ -203,7 +206,7 @@ function preinit(aIsRetry) {
 			// build body, based on err.reason, with localized template and with err.text and errex
 			var body, bodyarr;
 			switch (err.reason) {
-				// case 'STORE_CONNECT': // let default handler take care of this
+				// case 'STG_CONNECT': // let default handler take care of this
 				// 		//
 				// 	break;
 				// case 'EXE_CONNECT':
@@ -249,12 +252,12 @@ function init() {
 
 	startupBrowserAction();
 
-	var lastversion = nub.store.mem_lastversion;
+	var lastversion = nub.stg.mem_lastversion;
 	if (lastversion === '-1') {
 		// installed / first run
 		console.error('FIRST RUN');
 		storageCall('local', 'set', { mem_lastversion:nub.self.version })
-		.then(a=>console.log('set, nub.store:', nub.store));
+		.then(a=>console.log('set, nub.stg:', nub.stg));
 	} else if (lastversion !== nub.self.version) {
 		// downgrade or upgrade
 		if (isSemVer(nub.self.version, '>' + lastversion)) {
@@ -265,7 +268,7 @@ function init() {
 			console.error('DOWNGRADE');
 		}
 		storageCall('local', 'set', { mem_lastversion:nub.self.version })
-		.then(a=>console.log('set, nub.store:', nub.store));
+		.then(a=>console.log('set, nub.stg:', nub.stg));
 	} // else if (lastversion === nub.self.version) { } // browser startup OR enabled after having disabled
 }
 
@@ -308,40 +311,45 @@ async function fetchData(aArg={}) {
 
 	if (hydrant) {
 		data.hydrant = {};
-		if ('store' in hydrant) {
+		if ('stg' in hydrant) {
 			basketmain.add(
-				storageCall('local', 'get', Object.keys(hydrant.store)),
-				storeds => data.hydrant.store = storeds
-				// storeds => { console.log('got storeds:', storeds); data.store = storeds; }
+				storageCall('local', 'get', Object.keys(hydrant.stg)),
+				stgeds => data.hydrant.stg = stgeds
+				// stgeds => { console.log('got stgeds:', stgeds); data.stg = stgeds; }
 			);
 		}
-		if ('xprefs' in hydrant) { // xpcom_prefs
-			basketmain.add(
-				new Promise( resolve=>callInBootstrap('getXPrefs', { xprefs:{  'geo.provider.testing':'boolean', 'geo.wifi.uri':'string'  } }, xprefs => resolve(xprefs)) ),
-				xprefs => data.hydrant.xprefs=xprefs
-				// xprefs => { console.error('got xprefs in bg:', xprefs); data.xprefs=xprefs; }
-			)
-		}
+		// if ('xprefs' in hydrant) { // xpcom_prefs
+		// 	basketmain.add(
+		// 		new Promise( resolve=>callInBootstrap('getXPrefs', { nametypes:{  'geo.provider.testing':'boolean', 'geo.wifi.uri':'string'  } }, xprefs => resolve(xprefs)) ),
+		// 		xprefvals => data.hydrant.xprefs=xprefvals
+		// 		// xprefvals => { console.error('got xprefvals in bg:', xprefvals); data.xprefs=xprefvals; }
+		// 	)
+		// }
 	}
 
 	await basketmain.run();
 	return data;
 }
 
-class PromiseBasket {
-	constructor() {
-		this.promises = [];
-		this.thens = [];
-	}
-	add(aAsync, onThen) {
-		// onThen is optional
-		this.promises.push(aAsync);
-		this.thens.push(onThen);
-	}
-	async run() {
-		let results = await Promise.all(this.promises);
-		results.forEach((r, i)=>this.thens[i] ? this.thens[i](r) : null);
-		return results;
+function setFaking(aNewStatus) {
+	// aNewStatus - boolean; - true for on, false for off
+	switch (nub.browser.name) {
+		case 'firefox':
+
+				if (aNewStatus) {
+					let { pref_lat:lat, pref_lng:lng } = nub.stg;
+					let geojson = { location:{ lat, lng }, accuracy:4000, altitude:100 };
+					let geouri = 'data:,' + encodeURIComponent(JSON.stringify(geojson));
+					let xprefvals = { 'geo.wifi.uri':geouri, 'geo.provider.testing':true };
+					callInBootstrap('setXPrefs', { namevals:xprefvals } );
+				} else {
+					let xprefvals = { 'geo.wifi.uri':null, 'geo.provider.testing':null };
+					callInBootstrap('setXPrefs', { namevals:xprefvals });
+				}
+
+			break;
+		default:
+			throw new Error(nub.browser.name + ' browser not supported!')
 	}
 }
 
@@ -445,10 +453,10 @@ function storageCall(aArea, aAction, aKeys, aOptions) {
 								delete _storagecall_pendingset[setkey];
 							}
 
-							// SPECIAL - udpate nub.store
-							if (typeof(nub) == 'object' && nub.store) {
+							// SPECIAL - udpate nub.stg
+							if (typeof(nub) == 'object' && nub.stg) {
 								for (let setkey in aKeys) {
-									if (setkey in nub.store) nub.store[setkey] = aKeys[setkey];
+									if (setkey in nub.stg) nub.stg[setkey] = aKeys[setkey];
 								}
 							}
 
@@ -456,11 +464,11 @@ function storageCall(aArea, aAction, aKeys, aOptions) {
 						break;
 					case 'get':
 							// callback `check` triggred with 1 argument
-							var storeds = arg1;
-							resolve(storeds);
+							var stgeds = arg1;
+							resolve(stgeds);
 						break;
 				}
-				resolve(storeds);
+				resolve(stgeds);
 			}
 		};
 
@@ -496,5 +504,22 @@ function getBrowser() {
 		name: name,
 		version: version
 	};
+}
+
+class PromiseBasket {
+	constructor() {
+		this.promises = [];
+		this.thens = [];
+	}
+	add(aAsync, onThen) {
+		// onThen is optional
+		this.promises.push(aAsync);
+		this.thens.push(onThen);
+	}
+	async run() {
+		let results = await Promise.all(this.promises);
+		results.forEach((r, i)=>this.thens[i] ? this.thens[i](r) : null);
+		return results;
+	}
 }
 // end - cmn

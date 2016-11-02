@@ -393,17 +393,17 @@ function getAddonInfo(aAddonId=nub.self.id) {
 }
 
 function getXPrefs(aArgs) {
-	let { xprefs } = aArgs;
+	let { nametypes } = aArgs;
 	let rez = {};
 
-	// xprefs should be object { [pref_string]:[pref_type]}
+	// namevals should be object { [pref_string]:[pref_type]}
 		// pref_type is string - string, bool, int
 	// Services.prefs.PREF_STRING 32
 	// Services.prefs.PREF_BOOL 128
 	// Services.prefs.PREF_INT 64
 	// Services.prefs.PREF_INVALID 0
 
-	console.log('bootstrap getting xprefs:', xprefs);
+	console.log('bootstrap getting namevals:', namevals);
 
 	var getXTypeFromType = aPrefType => {
 		switch (aPrefType.toLowerCase()) {
@@ -418,13 +418,14 @@ function getXPrefs(aArgs) {
 		}
 	};
 
-	for (let a_xpref in xprefs) {
+	for (let name in nametypes) {
+		let type = namevals[name];
 		try {
-			rez[a_xpref] = Services.prefs['get' + getXTypeFromType(xprefs[a_xpref]) + 'Pref'](a_xpref);
+			rez[name] = Services.prefs['get' + getXTypeFromType(type) + 'Pref'](name);
 		} catch(ex) {
 			// pref doesnt exist
 			// console.error('ex during getXXXPref, ex:', ex);
-			rez[a_xpref] = null;
+			rez[name] = null;
 		}
 	}
 
@@ -432,8 +433,8 @@ function getXPrefs(aArgs) {
 }
 
 function setXPrefs(aArgs) {
-	let { xprefs } = aArgs;
-	// xprefs should be object { [pref_string]:pref_value }
+	let { namevals } = aArgs;
+	// namevals should be object { [pref_string]:pref_value }
 		// pref_value of null means reset it
 
 	var getXTypeFromValue = aPrefValue => {
@@ -449,11 +450,12 @@ function setXPrefs(aArgs) {
 		}
 	};
 
-	for (let a_xpref in xprefs) {
-		if (xprefs[a_xpref] === null) {
-			Services.prefs['clearUserPref'](a_xpref);
+	for (let name in namevals) {
+		let val = namevals[name];
+		if (val === null) {
+			Services.prefs['clearUserPref'](name);
 		} else {
-			Services.prefs['set' + getXTypeFromValue(xprefs[a_xpref]) + 'Pref'](a_xpref, xprefs[a_xpref]);
+			Services.prefs['set' + getXTypeFromValue(val) + 'Pref'](name, val);
 		}
 	}
 }

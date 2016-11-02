@@ -85,7 +85,7 @@ async function shouldUpdateHydrant() {
 
 	// check if hydrant updated
 	var hydrant_updated = false;
-	var pending_store_update = {};
+	var pending_stg_update = {};
 	for (var p in hydrant) {
 		var is_different = React.addons.shallowCompare({props:hydrant[p]}, state[p]);
 		if (is_different) {
@@ -93,10 +93,10 @@ async function shouldUpdateHydrant() {
 			hydrant_updated = true;
 
 			if (!gSupressUpdateHydrantOnce) {
-				// update file stores or whatever store this key in hydrant is connected to
+				// update file storages or whatever storage this key in hydrant is connected to
 
-				if (hydrant.store && p in hydrant.store) {
-					pending_store_update[p] = state[p];
+				if (hydrant.stg && p in hydrant.stg) {
+					pending_stg_update[p] = state[p];
 				} else if (p == 'addon_info') {
 					// make sure it is just applyBackgroundUpdates, as i only support changing applyBackgroundUpdates
 					if (hydrant.addon_info.applyBackgroundUpdates !== state.addon_info.applyBackgroundUpdates) {
@@ -115,10 +115,10 @@ async function shouldUpdateHydrant() {
 		gSupressUpdateHydrantOnce = false;
 		return;
 	} else {
-		if (pending_store_update) {
-			var aKeys = await callInBackground('storageCall', { aArea: 'local', aAction: 'set', aKeys: pending_store_update})
+		if (pending_stg_update) {
+			var aKeys = await callInBackground('storageCall', { aArea: 'local', aAction: 'set', aKeys: pending_stg_update})
 			for (let setkey in aKeys) {
-				if (setkey in nub.store) nub.store[setkey] = aKeys[setkey];
+				if (setkey in nub.stg) nub.stg[setkey] = aKeys[setkey];
 			}
 		}
 	}
@@ -127,84 +127,47 @@ async function shouldUpdateHydrant() {
 }
 
 var hydrant = {
-	store: {
+	stg: {
 		// set defaults here, as if it never has been set with `storageCall('storaget', 'set')` then `fetchData` will get back an empty object
 		pref_lat: '0',
-		pref_lng: '0'
-	},
-	xprefs: {
-		'geo.wifi.uri': null,
-		'geo.provider.testing': null
+		pref_lng: '0',
+		mem_faking: false
 	}
 };
 
 // ACTIONS
-const SET_PREF = 'SET_PREF';
-const SET_PREFS = 'SET_PREFS';
+const SET_STG = 'SET_STG';
+const SET_STGS = 'SET_STGS';
 const SET_MAIN_KEYS = 'SET_MAIN_KEYS';
-const SET_XPREF = 'SET_XPREF';
-const SET_XPREFS = 'SET_XPREFS';
 
 // ACTION CREATORS
-function setPref(name, val) {
+function setStg(name, val) {
 	return {
-		type: SET_PREF,
+		type: SET_STG,
 		name,
 		val
 	}
 }
-function setPrefs(namevals) {
+function setStgs(namevals) {
 	return {
-		type: SET_PREFS,
+		type: SET_STGS,
 		namevals
 	}
 }
-function setXPrefs(namevals) {
-	return {
-		type: SET_XPREFS,
-		namevals
-	}
-}
-function setMainKeys(obj_of_mainkeys) {
-	gSupressUpdateHydrantOnce = true;
-	return {
-		type: SET_MAIN_KEYS,
-		obj_of_mainkeys
-	}
-}
-
 // REDUCERS
-function prefs(state=hydrant.store, action) {
+function stg(state=hydrant.stg, action) {
 	switch (action.type) {
-		case SET_PREF:
+		case SET_STG:
 			var { name, val } = action;
 			return Object.assign({}, state, {
 				[name]: val
 			});
-		case SET_PREFS:
+		case SET_STGS:
 			var { namevals } = action;
 			return Object.assign({}, state, namevals);
 		case SET_MAIN_KEYS:
 			var { obj_of_mainkeys } = action;
-			var mainkey = 'prefs';
-			return (mainkey in obj_of_mainkeys ? obj_of_mainkeys[mainkey] : state);
-		default:
-			return state;
-	}
-}
-function xprefs(state=hydrant.xprefs, action) {
-	switch (action.type) {
-		case SET_XPREF:
-			var { name, val } = action;
-			return Object.assign({}, state, {
-				[name]: val
-			});
-		case SET_XPREFS:
-			var { namevals } = action;
-			return Object.assign({}, state, namevals);
-		case SET_MAIN_KEYS:
-			var { obj_of_mainkeys } = action;
-			var mainkey = 'xprefs';
+			var mainkey = 'stg';
 			return (mainkey in obj_of_mainkeys ? obj_of_mainkeys[mainkey] : state);
 		default:
 			return state;
@@ -212,8 +175,7 @@ function xprefs(state=hydrant.xprefs, action) {
 }
 
 var app = Redux.combineReducers({
-	prefs,
-	xprefs
+	stg
 });
 
 // REACT COMPONENTS - PRESENTATIONAL
@@ -235,7 +197,7 @@ var App = React.createClass({
 var Form = React.createClass({
 	displayName: 'Form',
 	render() {
-		const { lat, lng, isenabled } = this.props; // mapped state
+		const { lat='0', lng='0', isenabled } = this.props; // mapped state
 		const { enable, disable } = this.props; // dispatchers
 
 		console.error('lat:', lat, 'lng:', lng);
@@ -269,9 +231,9 @@ var Form = React.createClass({
 var FormContainer = ReactRedux.connect(
 	function(state, ownProps) {
 		return {
-			lat: state.prefs.pref_lat || '0',
-			lng: state.prefs.pref_lng || '0',
-			isenabled: state.xprefs['geo.provider.testing']
+			lat: state.stg.pref_lat,
+			lng: state.stg.pref_lng,
+			isenabled: state.stg.mem_faking
 		}
 	},
 	function(dispatch, ownProps) {
@@ -280,20 +242,14 @@ var FormContainer = ReactRedux.connect(
 				let lat = document.getElementById('lat').value;
 				let lng = document.getElementById('lng').value;
 
-				let geojson = { location:{ lat, lng }, accuracy:4000, altitude:100 };
-				let geouri = 'data:,' + encodeURIComponent(JSON.stringify(geojson));
-
-				let prefvals = {'pref_lat':lat,'pref_lng':lng};
-				let xprefvals = {'geo.wifi.uri':geouri,'geo.provider.testing':true};
-				callInBootstrap('setXPrefs', { xprefs:xprefvals } );
-				callInBackground('storageCall', { aArea:'local',aAction:'set',aKeys:prefvals })
-				dispatch(setPrefs(prefvals));
-				dispatch(setXPrefs(xprefvals));
+				var stgvals = { pref_lat:lat, pref_lng:lng, mem_faking:true };
+				callInBackground('storageCall', { aArea:'local',aAction:'set',aKeys:stgvals }, ()=>callInBackground('setFaking', true))
+				dispatch(setStgs(stgvals));
 			},
 			disable: () => {
-				let xprefvals = {'geo.wifi.uri':null,'geo.provider.testing':null};
-				callInBootstrap('setXPrefs', { xprefs:xprefvals });
-				dispatch(setXPrefs(xprefvals));
+				var stgvals = { mem_faking:false };
+				callInBackground('storageCall', { aArea:'local',aAction:'set',aKeys:stgvals }, ()=>callInBackground('setFaking', false))
+				dispatch(setStgs(stgvals));
 			}
 		}
 	}
