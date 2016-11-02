@@ -81,9 +81,6 @@ function preinit(aIsRetry) {
 			data: object - only if EXE_MISMATCH - keys: exeversion
 		}
 	*/
-	// give bootstrap nub
-	callInBootstrap('sendNub', { nub:nub });
-
 	// fetch storage
 	promiseallarr.push(new Promise(function(resolve, reject) {
 		storageCall('local', 'get', Object.keys(nub.stg))
