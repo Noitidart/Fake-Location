@@ -367,7 +367,7 @@ function setFaking(aNewStatus) {
 			chrome.browserAction.setBadgeText({text:chrome.i18n.getMessage('on')});
 			browserActionSetTitle(chrome.i18n.getMessage('browseraction_title_on'));
 		} else {
-			chrome.browserAction.setBadgeText({text:chrome.i18n.getMessage('')});
+			chrome.browserAction.setBadgeText({text:''});
 			browserActionSetTitle(chrome.i18n.getMessage('browseraction_title'));
 		}
 	} else {
