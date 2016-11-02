@@ -48,6 +48,9 @@
 	"browseraction_title": {
 		"message": "Fake Location"
 	},
+	"browseraction_title_on": {
+		"message": "Fake Location - ON"
+	},
 
 	"startupfailed_title": {
 		"message": "Fake Location - Critical Error"
@@ -68,5 +71,6 @@
 	"longitude": { "message": "Longitude" },
 	"latitude": { "message": "Latitude" },
 	"fake_enable": { "message": "Fake It" },
-	"fake_disable": { "message": "Stop Faking" }
+	"fake_disable": { "message": "Stop Faking" },
+	"on": {"message": "On"}
 }

@@ -287,6 +287,12 @@ function startupBrowserAction() {
 	} else {
 		chrome.browserAction.onClicked.addListener(onBrowserActionClicked);
 	}
+
+	callInBootstrap('getXPrefs', {'geo.provider.testing':'boolean'}, xprefvals => {
+		if (xprefvals['geo.provider.testing']) {
+			chrome.browserAction.setBadgeText({text:chrome.i18n.getMessage('on')});
+		}
+	});
 }
 function onBrowserActionClicked() {
 	console.log('opening menu.html now');
@@ -294,6 +300,14 @@ function onBrowserActionClicked() {
 }
 // end - browseraction
 
+function toggleBadge(isOn) {
+	if (isOn) {
+		if (nub.platform.os != 'android') chrome.browserAction.setBadgeText({text:chrome.i18n.getMessage('on')});
+	} else {
+		if (nub.platform.os != 'android') chrome.browserAction.setBadgeText({text:''});
+		chrome.browserAction.setTitle({text:chrome.i18n.getMessage('browseraction_title_on')})
+	}
+}
 async function fetchData(aArg={}) {
 	let { hydrant, nub:wantsnub } = aArg;
 	// xprefs means xpcom prefs

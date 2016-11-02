@@ -164,6 +164,7 @@ var windowListenerAndroid = {
 					var menuid = aDOMWindow.NativeWindow.menu.add({
 						name: gBrowserAction.title,
 						// icon: gBrowserAction.iconpath,
+						checkable: true,
 						callback: onBrowserActionClicked
 					});
 					gAndroidMenus.push({
