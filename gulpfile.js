@@ -126,9 +126,10 @@ gulp.task('xpi', function() {
 
 
 gulp.task('default', ['initial-tx-js']); // copy-3rdjs triggers tx-js
-gulp.task('watch', ['default'], function() {
+gulp.task('watch', ['initial-tx-js'], function() {
 	console.log('NOTE: wait for tx-then-xpi to finish, or it may have already finished. as that does the initial js copy');
-	var watcher = gulp.watch('src/**/*.js', ['tx-then-xpi']);
+	// var watcher = gulp.watch('src/**/*.js', ['tx-then-xpi']);
+	var watcher = gulp.watch('src/**/*', ['initial-tx-js']);
 	watcher.on('change', function(event) {
 		console.log('JS file at path "' + event.path + '" was ' + event.type + ', running tx-js...');
 	});

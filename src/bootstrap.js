@@ -392,6 +392,72 @@ function getAddonInfo(aAddonId=nub.self.id) {
 	return deferredmain_getaddoninfo.promise;
 }
 
+function getXPrefs(aArgs) {
+	let { xprefs } = aArgs;
+	let rez = {};
+
+	// xprefs should be object { [pref_string]:[pref_type]}
+		// pref_type is string - string, bool, int
+	// Services.prefs.PREF_STRING 32
+	// Services.prefs.PREF_BOOL 128
+	// Services.prefs.PREF_INT 64
+	// Services.prefs.PREF_INVALID 0
+
+	console.log('bootstrap getting xprefs:', xprefs);
+
+	var getXTypeFromType = aPrefType => {
+		switch (aPrefType.toLowerCase()) {
+			case 'string':
+				return 'Char';
+			case 'number':
+				return 'Int';
+			case 'boolean':
+				return 'Bool';
+			default:
+				throw new Error('invalid value for pref_type: "' + aPrefType + '"');
+		}
+	};
+
+	for (let a_xpref in xprefs) {
+		try {
+			rez[a_xpref] = Services.prefs['get' + getXTypeFromType(xprefs[a_xpref]) + 'Pref'](a_xpref);
+		} catch(ex) {
+			// pref doesnt exist
+			// console.error('ex during getXXXPref, ex:', ex);
+			rez[a_xpref] = null;
+		}
+	}
+
+	return rez;
+}
+
+function setXPrefs(aArgs) {
+	let { xprefs } = aArgs;
+	// xprefs should be object { [pref_string]:pref_value }
+		// pref_value of null means reset it
+
+	var getXTypeFromValue = aPrefValue => {
+		switch (typeof(aPrefValue)) {
+			case 'string':
+				return 'Char';
+			case 'number':
+				return 'Int';
+			case 'boolean':
+				return 'Bool';
+			default:
+				throw new Error('invalid type for aPrefValue, you probably want a string type!');
+		}
+	};
+
+	for (let a_xpref in xprefs) {
+		if (xprefs[a_xpref] === null) {
+			Services.prefs['clearUserPref'](a_xpref);
+		} else {
+			Services.prefs['set' + getXTypeFromValue(xprefs[a_xpref]) + 'Pref'](a_xpref, xprefs[a_xpref]);
+		}
+	}
+}
+
 // start - common helper functions
 function getNativeHandlePtrStr(aDOMWindow) {
 	var aDOMBaseWindow = aDOMWindow.QueryInterface(Ci.nsIInterfaceRequestor)

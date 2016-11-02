@@ -295,25 +295,34 @@ function onBrowserActionClicked() {
 // end - browseraction
 
 async function fetchData(aArg={}) {
-	let { hydrant, nub } = aArg;
+	let { hydrant, nub:wantsnub } = aArg;
+	// xprefs means xpcom prefs
 
 	let data = {};
 
 	let basketmain = new PromiseBasket;
 
-	if (nub) data.nub = nub;
+	if (wantsnub) data.nub = nub;
 
 	if (hydrant) {
-		if (hydrant.store) {
+		data.hydrant = {};
+		if ('store' in hydrant) {
 			basketmain.add(
 				storageCall('local', 'get', Object.keys(hydrant.store)),
-				storeds => data.store = storeds
+				storeds => data.hydrant.store = storeds
+				// storeds => { console.log('got storeds:', storeds); data.store = storeds; }
 			);
+		}
+		if ('xprefs' in hydrant) { // xpcom_prefs
+			basketmain.add(
+				new Promise( resolve=>callInBootstrap('getXPrefs', { xprefs:{  'geo.provider.testing':'boolean', 'geo.wifi.uri':'string'  } }, xprefs => resolve(xprefs)) ),
+				xprefs => data.hydrant.xprefs=xprefs
+				// xprefs => { console.error('got xprefs in bg:', xprefs); data.xprefs=xprefs; }
+			)
 		}
 	}
 
 	await basketmain.run();
-
 	return data;
 }
 
@@ -349,7 +358,7 @@ function reuseElseAddTab(url) {
 // end - polyfill for android
 
 // start - cmn
-// rev2 - https://gist.github.com/Noitidart/bcb964207ac370d3301720f3d5c9eb2b
+// rev3 - not yet comit - https://gist.github.com/Noitidart/bcb964207ac370d3301720f3d5c9eb2b
 var _storagecall_pendingset = {};
 var _storagecall_callid = 1;
 function storageCall(aArea, aAction, aKeys, aOptions) {
@@ -436,8 +445,8 @@ function storageCall(aArea, aAction, aKeys, aOptions) {
 
 							// SPECIAL - udpate nub.store
 							if (typeof(nub) == 'object' && nub.store) {
-								for (var setkey in aKeys) {
-									nub.store[setkey] = aKeys[setkey];
+								for (let setkey in aKeys) {
+									if (setkey in nub.store) nub.store[setkey] = aKeys[setkey];
 								}
 							}
 

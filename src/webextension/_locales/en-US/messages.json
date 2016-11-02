@@ -63,5 +63,10 @@
 	},
 	"startupfailed_unknown": {
 		"message": "The error is unknown. Try checking the \"Browser Console\" for more details."
-	}
+	},
+
+	"longitude": { "message": "Longitude" },
+	"latitude": { "message": "Latitude" },
+	"fake_enable": { "message": "Fake It" },
+	"fake_disable": { "message": "Stop Faking" }
 }
