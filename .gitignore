@@ -5,6 +5,7 @@ supplement/
 !.babelrc
 !.gitignore
 *.xpi
+!-unsigned.xpi
 
 #### below is auto generated .gitignore content by Github app
 # Windows image file caches
