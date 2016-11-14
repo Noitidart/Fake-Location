@@ -301,7 +301,7 @@ function startupBrowserAction() {
 }
 function onBrowserActionClicked() {
 	console.log('opening menu.html now');
-	addTab(nub.path.pages + 'app.html');
+	addTab(chrome.runtime.getURL(nub.path.pages + 'app.html'));
 }
 // end - browseraction
 
