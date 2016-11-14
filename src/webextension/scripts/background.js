@@ -1,4 +1,4 @@
-var nub  = {
+var nub = {
 	self: {
 		id: chrome.runtime.id,
 		version: chrome.runtime.getManifest().version,

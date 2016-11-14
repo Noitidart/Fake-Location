@@ -113,7 +113,7 @@ gulp.task('tx-js', function() {
 
 gulp.task('tx-then-xpi', ['tx-js'], function() {
 	return gulp.src('dist/**/*')
-        .pipe(zip('dist.xpi', { compress:false }))
+        .pipe(zip('_dist' + Date.now() + '.xpi', { compress:false }))
         .pipe(gulp.dest('./'));
 });
 

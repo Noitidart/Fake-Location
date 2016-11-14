@@ -3,3 +3,7 @@ label {
 	font-weight: bold;
 	margin: 0 6px;
 }
+
+#root {
+	padding: 10px;
+}

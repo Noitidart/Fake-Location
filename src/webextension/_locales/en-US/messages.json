@@ -68,5 +68,17 @@
 	"longitude": { "message": "Longitude" },
 	"latitude": { "message": "Latitude" },
 	"fake_enable": { "message": "Fake It" },
-	"fake_disable": { "message": "Stop Faking" }
+	"fake_disable": { "message": "Stop Faking" },
+	"search": { "message": "Search" },
+	"faking_details": {
+		"message": "Currently faking coordinates: $LAT$, $LNG$",
+		"placeholders": {
+			"LAT": {
+				"content": "$1"
+			},
+			"LNG": {
+				"content": "$2"
+			}
+		}
+	}
 }

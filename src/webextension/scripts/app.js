@@ -196,6 +196,33 @@ var App = React.createClass({
 
 var Form = React.createClass({
 	displayName: 'Form',
+	doSearch() {
+		let { updateLocalLatLng } = this.props; // dispatchers
+		let query = document.getElementById('query').value;
+		let url = 'http://dev.virtualearth.net/REST/v1/Locations?q=' + query + '&key=Atk19E44B6c_581Djzf5XWaM-WfUBUVhD5Md0GeiALGtyRsrW5pTHTKe51WP5FRA';
+		fetch(url)
+			.then(res => {
+				res.json()
+					.then(json => {
+						console.log('json:', json);
+						if (json.resourceSets && json.resourceSets[0].resources) {
+							let [lat, lng] = json.resourceSets[0].resources[0].geocodePoints[0].coordinates;
+							document.getElementById('lat').value = lat;
+							document.getElementById('lng').value = lng;
+						} else {
+							alert('No results found on Bing');
+						}
+					})
+					.catch(err => {
+						alert('Failed to get JSON from Bing server');
+						console.error('err:', err);
+					})
+			})
+			.catch(err => {
+				alert('Failed to get response from Bing server');
+				console.error('err:', err);
+			})
+	},
 	render() {
 		const { lat='0', lng='0', isenabled } = this.props; // mapped state
 		const { enable, disable } = this.props; // dispatchers
@@ -215,6 +242,15 @@ var Form = React.createClass({
 				),
 				React.createElement('input', { type:'text', id:'lng', defaultValue:lng, key:'lng_'+lng })
 			),
+			React.createElement('div', { className:'row'},
+				React.createElement('label', { htmlFor:'query' },
+					chrome.i18n.getMessage('search')
+				),
+				React.createElement('input', { type:'text', id:'query' }),
+				React.createElement('button', { onClick:this.doSearch },
+					chrome.i18n.getMessage('search')
+				)
+			),
 			React.createElement('div', { className:'row' },
 				React.createElement('button', { onClick:enable },
 					chrome.i18n.getMessage('fake_enable')
@@ -222,7 +258,11 @@ var Form = React.createClass({
 				React.createElement('button', { onClick:disable, disabled:!isenabled },
 					chrome.i18n.getMessage('fake_disable')
 				)
-			)
+			),
+			!isenabled ? undefined : React.createElement('div', { className:'row' },
+				chrome.i18n.getMessage('faking_details', [lat, lng])
+			),
+			React.createElement('img', { key:'lat_' + lat + '-lng_'+lng, src:'http://dev.virtualearth.net/REST/v1/Imagery/Map/Road/' + lat + ',' + lng + '/4?mapSize=400,400&pushpin=' + lat + ',' + lng + '&format=png&mapMetadata=0&key=Atk19E44B6c_581Djzf5XWaM-WfUBUVhD5Md0GeiALGtyRsrW5pTHTKe51WP5FRA' })
 		);
 	}
 });
