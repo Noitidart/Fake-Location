@@ -1,7 +1,7 @@
 {
 	"name": "__MSG_addon_name__",
 	"description": "__MSG_addon_desc__",
-	"version": "1.2b",
+	"version": "1.2",
 	"default_locale": "en-US",
 	"homepage_url": "https://github.com/Noitidart/Fake-Location/",
 	"icons": {
