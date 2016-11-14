@@ -1,6 +1,8 @@
 /* README
- * gulp - this will create release version, with regex replaced version in install.rdf
- * gulp --beta - this will not parseFloat the version in install.rdf
+ * --txtype fxhyb can be omitted, its default
+ * gulp --txtype fxhyb - will create dev vresion, with console logs
+ * gulp --prod --txtype fxhyb - this will create release version, without console logs
+ * gulp watch --txtype fxhyb - this will watch for changes
  */
 
 // Include gulp
