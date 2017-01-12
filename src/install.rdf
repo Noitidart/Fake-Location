@@ -34,15 +34,15 @@
 		<!-- Front End MetaData -->
 		<!-- must provide default non-localized because It's used as a default on AMO. It's used as a default by the add-on manager, with the possibility of other locales overriding it. Failure to provide a non-localized name will lead to failed upload on AMO. -->
 		<em:name>Fake Location</em:name>
-		<em:description>Trick geolocation service.</em:description>
+		<em:description>Tricks geolocation service.</em:description>
 		<em:creator>Noitidart</em:creator>
 
 		<!-- start localizing - For each entry in default data MUST have equivalent in each localized block -->
 		<em:localized>
 			<Description>
 				<em:locale>en-US</em:locale>
-				<em:name>Fake Location</em:name>
-				<em:description>Trick geolocation service</em:description>
+                <em:name>Fake Location</em:name>
+        		<em:description>Tricks geolocation service.</em:description>
 				<em:creator>Noitidart</em:creator>
 			</Description>
 		</em:localized>

@@ -5,3 +5,5 @@
 * react-dom.min.js - https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react-dom.min.js
 * react-redux.min.js - https://cdnjs.cloudflare.com/ajax/libs/react-redux/4.4.5/react-redux.min.js
 * redux.min.js - https://cdnjs.cloudflare.com/ajax/libs/redux/3.6.0/redux.min.js
+* react-router.min.js - https://unpkg.com/react-router@4.0.0-alpha.6/umd/
+* react-history.min.js - https://unpkg.com/react-history@0.18.2/umd/

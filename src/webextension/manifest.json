@@ -15,26 +15,24 @@
 	"manifest_version": 2,
 	"applications": {
 		"gecko": {
-			"id": "@fake-location",
+			"id": "{{EXTID}}",
 			"strict_min_version": "51.0"
 		}
 	},
 
 	"incognito": "spanning",
 	"permissions": [
-		"storage",
-		"http://dev.virtualearth.net/"
-	],
+        "storage",
+        "webNavigation",
+        "webRequest",
+        "webRequestBlocking"
+    ],
 
-	"background": {
-		"scripts": ["scripts/3rd/polyfill.min.js", "scripts/3rd/comm/webext.js", "scripts/3rd/ba-issemver.min.js", "scripts/background.js"]
-	},
+	"background": { "page": "pages/background.html" },
 
 	"browser_action": {
 		"default_icon": "images/icon.svg",
 		"browser_style": true,
 		"default_title": "__MSG_browseraction_title__"
-	},
-
-	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';"
+	}
 }

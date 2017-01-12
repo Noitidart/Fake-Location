@@ -1,70 +1,35 @@
 {
-	"bootstrap_languagecode": {
-		"message": "en",
-		"description": "Please go to http://usrz.github.io/bootstrap-languages/ and then find the code for your lanaguge. This may not be the same as the \"ISO Language Code/Tag/\". For instance, for the ISO Code/Tag of \"en-US\" the Bootstrap Code/Tag is \"en\""
-	},
-	"bidi_dir": {
-		"message": "ltr",
-		"description": "The text direction for the current locale, either \"ltr\" for left-to-right languages such as English or \"rtl\" for right-to-left languages such as Japanese."
-	},
-	"bidi_reversed_dir": {
-		"message": "rtl",
-		"description": "If the `bidi_dir` is \"ltr\", then this is \"rtl\"; otherwise, it's \"ltr\"."
-	},
-	"bidi_start_edge": {
-		"message": "left",
-		"description": "If the `bidi_dir` is \"ltr\", then this is \"left\"; otherwise, it's \"right\"."
-	},
-	"bidi_end_edge": {
-		"message": "right",
-		"description": "If the `bidi_dir` is \"ltr\", then this is \"right\"; otherwise, it's \"left\"."
-	},
+	"bootstrap_languagecode": { "message": "en", "description": "Please go to http://usrz.github.io/bootstrap-languages/ and then find the code for your lanaguge. This may not be the same as the \"ISO Language Code/Tag/\". For instance, for the ISO Code/Tag of \"en-US\" the Bootstrap Code/Tag is \"en\"" },
 
-	"addon_name": {
-		"message": "Fake Location"
+	"bidi_dir": { "message": "ltr", "description": "The text direction for the current locale, either \"ltr\" for left-to-right languages such as English or \"rtl\" for right-to-left languages such as Japanese." },
+	"bidi_reversed_dir": { "message": "rtl", "description": "If the `bidi_dir` is \"ltr\", then this is \"rtl\"; otherwise, it's \"ltr\"." },
+	"bidi_start_edge": { "message": "left", "description": "If the `bidi_dir` is \"ltr\", then this is \"left\"; otherwise, it's \"right\"." },
+	"bidi_end_edge": { "message": "right", "description": "If the `bidi_dir` is \"ltr\", then this is \"right\"; otherwise, it's \"left\"." },
+
+	"addon_name": { "message": "Fake Location" },
+	"addon_desc": { "message": "Tricks geolocation service." },
+	"addon_version_short": { "message": "v$NUMBER$", "placeholders": { "NUMBER": { "content": "$1" } } },
+	"addon_version_long": { "message": "Version $NUMBER$", "placeholders": { "NUMBER": { "content": "$1" } } },
+
+	"startupfailed_title": { "message": "Fake Location - Critical Error" },
+	"startupfailed_body": { "message": "Fake Location cannot be used because it failed to startup.\n\n$REASON$", "placeholders": { "REASON":{"content":"$1","example":"one of the entries from the startupfailed_ stuff below"}} },
+	"startupfailed_unknown": { "message": "The error is unknown. Please see \"Browser Console\" for more details. Try restarting the extension to fix this problem." },
+	"startupfailed_execonnect": { "message": "Failed to connect to executable: $REASON$", "placeholders": { "REASON": { "content": "$1", "example": "error returned by browser/firefox" } } },
+	"startupfailed_execonnectinstall": { "message": "Failed to connect to executable: $CONNTECT_REASON$\n\nTried to copy executable files but this also failed ($INSTALL_REASON$).", "placeholders": { "CONNTECT_REASON":{"content":"$1"}, "INSTALL_REASON":{"content":"$2"} } },
+	"startupfailed_exemismatch": {
+		"message": "Version of installed executable ($EXEVER$) does not match extension ($EXTVER$). Automatic executable update failed. $HOWTOFIX$",
+		"placeholders": {"EXEVER":{"content": "$1"},"EXTVER":{"content": "$2"},"HOWTOFIX": {"content": "$3", "description": "either `startupfailed_exemismatch_howtofix1` or `startupfailed_exemismatch_howtofix2`" }}
 	},
-	"addon_desc": {
-		"message": "Tricks geolocation service."
-	},
-	"addon_version_short": {
-		"message": "v$NUMBER$",
-		"placeholders": {
-			"NUMBER": {
-				"content": "$1",
-				"example": "2.3"
-			}
-		}
-	},
-	"addon_version_long": {
-		"message": "Version $NUMBER$",
-		"placeholders": {
-			"NUMBER": {
-				"content": "$1",
-				"example": "2.3"
-			}
-		}
-	},
+	"startupfailed_exemismatch_howtofix1": { "message": "Please manually upgrade the executable *OR* downgrade the extension." },
+	"startupfailed_exemismatch_howtofix2": { "message": "Please manually downgrade the executable *OR* upgrade the extension." },
 
 	"browseraction_title": { "message": "Fake Location" },
+    "initializing_step": { "message": "Initializing ($CURRENT_STEP$/$TOTAL_STEP_COUNT$)", "placeholders":{"CURRENT_STEP":{"content":"$1"}, "TOTAL_STEP_COUNT":{"content":"$2"}} },
+    "badge_error": { "message": "Error" },
+	
 	"browseraction_title_on": { "message": "Fake Location (ON)" },
 	"on": { "message": "On" },
-
-	"startupfailed_title": {
-		"message": "Fake Location - Critical Error"
-	},
-	"startupfailed_body": {
-		"message": "Fake Location cannot be used because it failed to startup.\n\n$REASON$",
-		"placeholders": {
-			"REASON": {
-				"content": "$1",
-				"example": "the startupfailed_ stuff below"
-			}
-		}
-	},
-	"startupfailed_unknown": {
-		"message": "The error is unknown. Try checking the \"Browser Console\" for more details."
-	},
-
+	
 	"longitude": { "message": "Longitude" },
 	"latitude": { "message": "Latitude" },
 	"fake_enable": { "message": "Fake It" },
@@ -73,12 +38,8 @@
 	"faking_details": {
 		"message": "Currently faking coordinates: $LAT$, $LNG$",
 		"placeholders": {
-			"LAT": {
-				"content": "$1"
-			},
-			"LNG": {
-				"content": "$2"
-			}
+			"LAT": { "content": "$1" },
+			"LNG": { "content": "$2" }
 		}
 	}
 }
