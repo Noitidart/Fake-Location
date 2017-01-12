@@ -17,6 +17,7 @@ var fs = require('fs');
 var path = require('path');
 
 // Include Our Plugins
+var addsrc = require('gulp-add-src');
 var babel = require('gulp-babel');
 var clean = require('gulp-clean');
 var contains = require('gulp-contains');
@@ -111,12 +112,14 @@ gulp.task('copy', ['copy-zip-exe'], function() {
 			'!src/.*/**/*',		// no files/dirs in hidden dirs in src
 			'!src/**/*.js',		// no js files from src
 			'!src/webextension/exe/**/*',		// no exe folder
-			'src/**/3rd/*.js'	// make sure to get 3rd party js files though
+			'src/**/3rd/*.js',	// make sure to get 3rd party js files though
+            '!src/**/*.png' // link19292 because doing `replace` on png even if nothing replaced screws them up
         ])
         .pipe(gulpif(!options.production, replace(/\{\{MINIFPROD\}\}/g, '')))
         .pipe(gulpif(options.production, replace(/\{\{MINIFPROD\}\}/g, '.min')))
         .pipe(replace(/\{\{CHROMEMANIFESTKEY\}\}/g, CHROMEMANIFESTKEY))
         .pipe(replace(/\{\{EXTID\}\}/g, EXTID))
+        .pipe(addsrc('src/**/*.png')) // link19292
         .pipe(gulp.dest('dist'));
 });
 
