@@ -44,13 +44,8 @@ var nub = {
 				// mem are prefeixed with "mem_" - mem stands for extension specific "cookies"/"system memory"
 				// filesystem-like stuff is prefixied with "fs_"
 		mem_lastversion: '-1', // indicates not installed - the "last installed version"
-		mem_oauth: {},
-		pref_hotkeys: [],
-        pref_serials: {} // {serial:qty} // added only if valid, but users can be bad and add stuff here, which will allow gui enabling more then allowed, but the exe will not enable more
-	},
-	data: {
-        min_enable_count: 3
-    }
+		pref_geo: {}
+	}
 };
 formatNubPaths();
 
@@ -433,6 +428,7 @@ async function fetchData(aArg={}) {
 
 	if (hydrant_instructions) {
 		data.hydrant = {};
+
 		if ('stg' in hydrant_instructions) {
 			basketmain.add(
 				storageCall('local', 'get', Object.keys(hydrant_instructions.stg)),
@@ -440,6 +436,15 @@ async function fetchData(aArg={}) {
 				// stgeds => { console.log('got stgeds:', stgeds); data.stg = stgeds; }
 			);
 		}
+
+        if ('lang' in hydrant_instructions) {
+            basketmain.add(
+                async function() {
+                    data.hydrant.lang = await getSelectedLocale('addon_desc');
+                }()
+			);
+        }
+
 		// if ('xprefs' in hydrant_instructions) { // xpcom_prefs
 		// 	basketmain.add(
 		// 		new Promise( resolve=>callInBootstrap('getXPrefs', { nametypes:{  'geo.provider.testing':'boolean', 'geo.wifi.uri':'string'  } }, xprefs => resolve(xprefs)) ),

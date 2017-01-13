@@ -5,7 +5,214 @@ var callInBootstrap = Comm.callInX2.bind(null, gBgComm, 'callInBootstrap', null)
 var callInMainworker = Comm.callInX2.bind(null, gBgComm, 'callInMainworker', null);
 let callIn = (...args) => new Promise(resolve => window['callIn' + args.shift()](...args, val=>resolve(val))); // must pass undefined for aArg if one not provided, due to my use of spread here. had to do this in case first arg is aMessageManagerOrTabId
 
-alert('hi');
+let nub;
+let store;
+
+let hydrant_instructions = {stg:{pref_geo:1}, lang:1};
+let hydrant = {
+	stg: {
+		// set defaults here, as if it never has been set with `storageCall('storaget', 'set')` then `fetchData` will get back an empty object
+        pref_geo: {}
+	},
+    lang: 'en-US'
+};
+
+
+window.addEventListener('DOMContentLoaded', init, false);
+async function init() {
+    console.error('calling fetchData with hydrant skeleton:', hydrant);
+    document.title = browser.i18n.getMessage('addon_name');
+
+    let data = await callIn('Background', 'fetchData', { hydrant_instructions, nub:1 });
+
+    nub = data.nub;
+    objectAssignDeep(hydrant, data.hydrant); // dont update hydrant if its undefined, otherwise it will screw up all default values for redux
+
+    // set pathname for react-router
+    let initial_pathname = '/';
+    let qparam = {};
+    try {
+        qparam = queryStringDom(window.location.href);
+    } catch(ignore) {}
+    if (qparam.page) {
+        initial_pathname += qparam.page;
+        delete qparam.page;
+    }
+    if (Object.keys(qparam).length) initial_pathname += '?' + queryStringDom(qparam);
+    window.history.replaceState({key:nub.self.chromemanifestkey + '-' + Date.now()}, browser.i18n.getMessage('addon_name'), initial_pathname);
+
+    // prepare react-router
+    gHistory = History.createBrowserHistory();
+    initial_router_state.location = gHistory.location;
+    initial_router_state.action = gHistory.action;
+
+    // setup and start redux
+    app = Redux.combineReducers({
+        geo,
+        lang,
+        router
+    });
+    store = Redux.createStore(app);
+
+    // render react
+	ReactDOM.render(
+        React.createElement(ReactRedux.Provider, { store },
+            React.createElement(App)
+        ),
+        document.body
+    );
+
+    window.addEventListener('focus', focusAppPage, false);
+}
+
+async function focusAppPage() {
+    // console.log('focused!!!!!!');
+    // let data = await callIn('Background', 'fetchData', { hydrant_instructions });
+    //
+    // let newhydrant = data.hydrant;
+    //
+    // let newmainkeys = {};
+    // let state = store.getState();
+    // let checks = [
+    //
+    // ];
+    //
+    //
+    // for (let check of checks) {
+    //     let { name, dotpath, isDiff } = check;
+    //
+    //     const MISSING = {};
+    //     let cur = deepAccessUsingString(state, dotpath.store, MISSING);
+    //     if (cur === MISSING) continue; // check if dotpath is available in data, if its not, then background didnt send it over so skip it
+    //
+    //     let next = deepAccessUsingString(data, dotpath.data);
+    //     // console.log('dotpath.data:', dotpath.data, 'next:', next, 'data:', data);
+    //
+    //     if (isDiff(cur, next)) {
+    //         console.log(`${name} is changed! was:`, cur, 'now:', next);
+    //         newmainkeys[dotpath.store] = next;
+    //     }
+    // }
+    //
+    // if (Object.keys(newmainkeys).length) store.dispatch(setMainKeys(newmainkeys));
+    // else console.log('nothing changed');
+}
+
+// GERNAL ACTIONS AND CREATORS - no specific reducer because each reducer will respect these actions
+const SET_MAIN_KEYS = 'SET_MAIN_KEYS';
+function setMainKeys(obj_of_mainkeys) {
+	return {
+		type: SET_MAIN_KEYS,
+		obj_of_mainkeys
+	}
+}
+
+// ROUTER ACTIONS AND CREATORS AND REDUCER
+let gHistory;
+let initial_router_state = {};
+
+const NAVIGATE = 'NAVIGATE';
+function navigate(location, action) {
+    return {
+        type: NAVIGATE,
+        location,
+        action
+    }
+}
+
+function router(state=initial_router_state, action) {
+    switch (action.type) {
+		case NAVIGATE:
+			return {
+                location: action.location,
+                action: action.action
+            }
+		default:
+			return state;
+	}
+}
+
+// LANG ACTIONS AND CREATORS AND REDUCER
+function lang(state=hydrant.lang, action) {
+	switch (action.type) {
+		case SET_MAIN_KEYS: {
+			const reducer = 'lang';
+			let { [reducer]:reduced } = action.obj_of_mainkeys;
+			return reduced || state;
+		}
+		default:
+			return state;
+	}
+}
+
+// GEO ACTIONS AND CREATORS AND REDUCER
+function geo(state=hydrant.stg.pref_geo, action) {
+	switch (action.type) {
+		case SET_MAIN_KEYS: {
+			const reducer = 'geo';
+			let { [reducer]:reduced } = action.obj_of_mainkeys;
+			return reduced || state;
+		}
+		default:
+			return state;
+	}
+}
+
+let app;
+
+const PropTypes = React.PropTypes;
+
+const ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+var gTrans = [ // needs to be var, so its accessible to dom-react.js
+	createTrans('fadequick', 150, 150, true),
+	createTrans('fade', 300, 300, true),
+	createTrans('modalfade', 300, 300, true)
+];
+initTransTimingStylesheet(); // must go after setting up gTrans
+
+// REACT COMPONENTS - PRESENTATIONAL
+const App = ReactRedux.connect(
+    state => ({ location: state.router.location, action: state.router.action })
+)(React.createClass({
+    displayName: 'App',
+    propTypes: {
+        location: PropTypes.object, // router/redux
+        action: PropTypes.string, // router/redux
+        dispatch: PropTypes.func, // redux
+    },
+    handleRouterChange(location, action) {
+        let { dispatch } = this.props;
+        console.log('router changed', 'location:', location, 'action:', action);
+        if (action == 'SYNC') dispatch(navigate(location, this.props.action)); // you must always dispatch a `SYNC` action, because, guess what? you can't actual control the browser history! anyway, use your current action not "SYNC"
+        else if (!window.block) dispatch(navigate(location, action)); // if you want to block transitions go into the console and type in `window.block = true` and transitions won't happen anymore
+        else console.error('blocked!')
+    },
+    render() {
+        let { location, action } = this.props;
+
+        return React.createElement(ReactHistory.ControlledBrowserRouter, { history:gHistory, location, action, onChange:this.handleRouterChange },
+            React.DOM.div(null,
+                React.DOM.ul(null,
+                    React.DOM.li(null,
+                        React.createElement(ReactRouter.Link, {to:'/one'}, 'One'),
+                    ),
+                    React.DOM.li(null,
+                        React.createElement(ReactRouter.Link, {to:'/two'}, 'Two'),
+                    ),
+                    React.DOM.li(null,
+                        React.createElement(ReactRouter.Link, {to:'/three'}, 'Three')
+                    )
+                ),
+                React.DOM.div({ style:{padding:'10px'} },
+                    React.createElement(ReactRouter.Match, { pattern:'/', exactly:true, render:()=>React.DOM.div(null, 'Home') }),
+                    React.createElement(ReactRouter.Match, { pattern:'/one', exactly:true, render:()=>React.DOM.div(null, 'One') }),
+                    React.createElement(ReactRouter.Match, { pattern:'/two', exactly:true, render:()=>React.DOM.div(null, 'Two') }),
+                    React.createElement(ReactRouter.Match, { pattern:'/three', exactly:true, render:()=>React.DOM.div(null, 'Three') })
+                )
+            )
+        );
+    }
+}));
 
 // start - specific helpers
 function genFilename() {

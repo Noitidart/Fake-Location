@@ -158,6 +158,8 @@ gulp.task('import-3rdjs', ['copy'], function() {
 			'node_modules/redux-thunk/dist/redux-thunk' + minifprod + '.js',
 			'node_modules/react-router/umd/react-router' + minifprod + '.js',
 			'node_modules/react-router-addons-controlled/umd/react-router-addons-controlled' + minifprod + '.js',
+			'node_modules/react-router-addons-controlled/umd/react-history' + minifprod + '.js',
+			'node_modules/history/umd/history' + minifprod + '.js'
         ])
         .pipe(gulp.dest(dest));
 });
