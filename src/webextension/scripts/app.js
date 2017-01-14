@@ -45,6 +45,7 @@ async function init() {
     gHistory = History.createBrowserHistory();
     initial_router_state.location = gHistory.location;
     initial_router_state.action = gHistory.action;
+    // to programtically navigate, use gHistory.push('/one/rawr')
 
     // setup and start redux
     app = Redux.combineReducers({
@@ -52,7 +53,9 @@ async function init() {
         lang,
         router
     });
-    store = Redux.createStore(app);
+    store = Redux.createStore(app, Redux.applyMiddleware(
+        ReduxThunk.default // lets us dispatch() functions
+    ));
 
     // render react
 	ReactDOM.render(
@@ -170,7 +173,7 @@ var gTrans = [ // needs to be var, so its accessible to dom-react.js
 ];
 initTransTimingStylesheet(); // must go after setting up gTrans
 
-// REACT COMPONENTS - PRESENTATIONAL
+// REACT/REDUX COMPONENTS
 const App = ReactRedux.connect(
     state => ({ location: state.router.location, action: state.router.action })
 )(React.createClass({
@@ -190,6 +193,8 @@ const App = ReactRedux.connect(
     render() {
         let { location, action } = this.props;
 
+        console.log('component App rendered, props:', this.props);
+
         return React.createElement(ReactHistory.ControlledBrowserRouter, { history:gHistory, location, action, onChange:this.handleRouterChange },
             React.DOM.div(null,
                 React.DOM.ul(null,
@@ -204,8 +209,8 @@ const App = ReactRedux.connect(
                     )
                 ),
                 React.DOM.div({ style:{padding:'10px'} },
-                    React.createElement(ReactRouter.Match, { pattern:'/', exactly:true, render:()=>React.DOM.div(null, 'Home') }),
-                    React.createElement(ReactRouter.Match, { pattern:'/one', exactly:true, render:()=>React.DOM.div(null, 'One') }),
+                    React.createElement(ReactRouter.Match, { pattern:'/', exactly:true, component:Home }),
+                    React.createElement(ReactRouter.Match, { pattern:'/one/:pid?', exactly:true, component:One }),
                     React.createElement(ReactRouter.Match, { pattern:'/two', exactly:true, render:()=>React.DOM.div(null, 'Two') }),
                     React.createElement(ReactRouter.Match, { pattern:'/three', exactly:true, render:()=>React.DOM.div(null, 'Three') })
                 )
@@ -214,6 +219,41 @@ const App = ReactRedux.connect(
     }
 }));
 
+const Home = ReactRedux.connect(
+    (state, ownProps) => {
+        return {
+            lkey: state.router.location.key,
+            geo: state.geo
+        }
+    }
+)(React.createClass({
+    displayName: 'Home',
+    propTypes: {
+        // mapped state
+        geo: PropTypes.object,
+        lkey: PropTypes.string,
+        // router/redux
+        pattern: PropTypes.string,
+        pathname: PropTypes.string,
+        isExact: PropTypes.bool,
+        location: PropTypes.object,
+        params: PropTypes.object,
+        // redux
+        dispatch: PropTypes.func
+    },
+    render() {
+        console.log('component Home rendered, props:', this.props);
+        return React.DOM.div(null, 'Home');
+    }
+}));
+
+const One = React.createClass({
+    displayName: 'One',
+    render() {
+        console.log('component One rendered, props:', this.props);
+        return React.DOM.div(null, 'ONE');
+    }
+});
 // start - specific helpers
 function genFilename() {
 	// salt generator from http://mxr.mozilla.org/mozilla-aurora/source/toolkit/profile/content/createProfileWizard.js?raw=1*/
