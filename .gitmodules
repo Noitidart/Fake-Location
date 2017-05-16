@@ -1,6 +1,0 @@
-[submodule "src/webextension/scripts/3rd/comm"]
-	path = src/webextension/scripts/3rd/comm
-	url = git@github.com:Noitidart/Comm
-[submodule "src/webextension/scripts/common"]
-	path = src/webextension/scripts/common
-	url = git@github.com:Noitidart/common
