@@ -64,30 +64,34 @@ class Base {
     }
     // end related two methods
     unregister() {
+        try {
+            alert('is unregistering now');
+        } catch(ignore) {}
         if (this.isunregistered) throw new Error(`Comm.${this.commname} - already unregistered`);
         this.isunregistered = true;
+        for (const handler of this.onUnregister.handlers) handler(this.target, this);
     }
-    // onUnregister = {
-    //     handlers: [],
-    //     addListener: function(handler) {
-    //         // returns true if added, else false if already there
-    //         if (!this.handlers.includes(handler)) {
-    //             this.handlers.push(handler);
-    //             return true;
-    //         }
-    //         return false;
-    //     },
-    //     removeListener: function(handler) {
-    //         // returns true if removed, else false if it was never there
-    //         let ix = this.handlers.indexOf(handler);
-    //         if (ix > -1) {
-    //             this.handlers.splice(ix, 1);
-    //             return true;
-    //         }
-    //         return false;
-    //     }
-    // }
     // private - to comm - extenders dont touch this
+    onUnregister = { // onPortDisconnect
+        handlers: [],
+        addListener: function(handler) {
+            // returns true if added, else false if already there
+            if (!this.handlers.includes(handler)) {
+                this.handlers.push(handler);
+                return true;
+            }
+            return false;
+        },
+        removeListener: function(handler) {
+            // returns true if removed, else false if it was never there
+            let ix = this.handlers.indexOf(handler);
+            if (ix > -1) {
+                this.handlers.splice(ix, 1);
+                return true;
+            }
+            return false;
+        }
+    }
     sendMessage = (...args) => {
         let aClientId, aMethod, aArg, aCallback;
         if (this.multiclient) {

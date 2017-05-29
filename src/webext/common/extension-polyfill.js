@@ -77,4 +77,3 @@ window.extensiona = function(dotpath, ...args) {
 //         return target[name];
 //     }
 // });
-console.error("ok extension-ified")
