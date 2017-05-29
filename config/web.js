@@ -1,6 +1,9 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
+const utils = require('./utils');
+
+utils.deleteFolderRecursive('./dist/web');
 
 module.exports = function (env) {
     return {
@@ -25,7 +28,7 @@ module.exports = function (env) {
             new CopyWebpackPlugin([
                 { from:'./src/web' }
             ], {
-                ignore: ['*.js']
+                ignore: ['*.js', '*.css']
             })
         ]
     }

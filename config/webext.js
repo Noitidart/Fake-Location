@@ -2,10 +2,11 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
+const utils = require('./utils');
 
 const PROPS = JSON.parse(fs.readFileSync('config/props.json', 'utf8')).webext;
 
-deleteFolderRecursive('./dist/webext');
+utils.deleteFolderRecursive('./dist/webext');
 
 // copy browser-polyfill to src!! not to dist! as otherwise it `import '../common/browser-polyfill'` will fail
 // fs.createReadStream('node_modules/webextension-polyfill/dist/browser-polyfill.min.js').pipe(fs.createWriteStream('src/webext/common/browser-polyfill.js'));
@@ -42,17 +43,3 @@ module.exports = function (env) {
     }
 }
 
-// http://stackoverflow.com/a/32197381/1828637
-function deleteFolderRecursive(path) {
-  if( fs.existsSync(path) ) {
-    fs.readdirSync(path).forEach(function(file,index){
-      var curPath = path + "/" + file;
-      if(fs.lstatSync(curPath).isDirectory()) { // recurse
-        deleteFolderRecursive(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
-};

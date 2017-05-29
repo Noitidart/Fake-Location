@@ -1,34 +1,35 @@
-navigator.geolocation.getCurrentPosition = function(onSuccess, onError, options) {
-    function Coordinates(options) {
-        var defaults = {latitude:0, longitude:0, altitude:null, accuracy:4000, altitudeAccuracy:null, heading:NaN, speed:NaN};
-        for (var param in defaults) {
-            this[param] = options[param] !== undefined ? options[param] : defaults[param];
-        }
-    }
-    function Position(params) {
-        this.coords = new Coordinates(params);
-        this.timestamp = Date.now();
-    }
+var UNHACKED = {
+    getCurrentPosition: navigator.geolocation.getCurrentPosition,
+    clearWatch: navigator.geolocation.clearWatch,
+    watchPosition: navigator.geolocation.watchPosition
+}
 
+function uninitialize() {
+    navigator.geolocation.getCurrentPosition = navigator.geolocation.getCurrentPosition;
+    navigator.geolocation.clearWatch = navigator.geolocation.clearWatch;
+    navigator.geolocation.watchPosition = navigator.geolocation.watchPosition;
+}
+
+function Coordinates(options) {
+    var defaults = {latitude:0, longitude:0, altitude:null, accuracy:4000, altitudeAccuracy:null, heading:NaN, speed:NaN};
+    for (var param in defaults) {
+        this[param] = options[param] !== undefined ? options[param] : defaults[param];
+    }
+}
+function Position(params) {
+    this.coords = new Coordinates(params);
+    this.timestamp = Date.now();
+}
+
+navigator.geolocation.getCurrentPosition = function(onSuccess, onError, options) {
     let pos = new Position({latitude:4, longitude:1});
 
     onSuccess(pos);
-};
+}
 
 var HACKED_GEO_WATCH_ID = 0;
 var HACKED_GEO_WATCHERS = {};
 navigator.geolocation.watchPosition = function(onSuccess, onError, options) {
-    function Coordinates(options) {
-        var defaults = {latitude:0, longitude:0, altitude:null, accuracy:4000, altitudeAccuracy:null, heading:NaN, speed:NaN};
-        for (var param in defaults) {
-            this[param] = options[param] !== undefined ? options[param] : defaults[param];
-        }
-    }
-    function Position(params) {
-        this.coords = new Coordinates(params);
-        this.timestamp = Date.now();
-    }
-
     let pos = new Position({latitude:4, longitude:1});
 
 
@@ -41,7 +42,7 @@ navigator.geolocation.watchPosition = function(onSuccess, onError, options) {
         // console.log('id:', id)
 
     return id;
-};
+}
 
 navigator.geolocation.clearWatch = function(id) {
     delete HACKED_GEO_WATCHERS[id.toString()];

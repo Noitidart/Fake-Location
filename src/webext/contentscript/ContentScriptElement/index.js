@@ -1,19 +1,16 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 
-import BrowserAction from './BrowserAction'
-
-export default class BackgroundElement extends Component {
-    static propTypes = {
-        core: PropTypes.object,
-        browser_action: PropTypes.object,
-        dispatch: PropTypes.func.isRequired
-    }
+export default class ContentScriptElement extends Component {
+    /* props
+    dispatch
+    core
+    */
     render() {
-        console.log('in renderof BackgroundElement');
-        let { browser_action, dispatch } = this.props;
+        console.log('in renderof ContentScriptElement');
+        const { core } = this.props;
         return (
             <div>
-                <BrowserAction {...browser_action} dispatch={dispatch} />
+                ContentScript hiiiiiiiiiiii {JSON.stringify(core)}
             </div>
         )
     }
