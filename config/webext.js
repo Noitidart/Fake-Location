@@ -17,7 +17,8 @@ module.exports = function (env) {
         entry: {
             background: './src/webext/background/index.js',
             app: './src/webext/app/index.js',
-            contentscript: './src/webext/contentscript/index.js'
+            inject: './src/webext/inject/index.js',
+            injectable: './src/webext/injectable/index.js'
         },
         output: {
             path: path.join(__dirname, '../dist/webext'),

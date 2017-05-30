@@ -53,7 +53,7 @@ export class Server extends Base {
         for (let [, port] of Object.entries(this.ports)) {
             port.disconnect();
             this.disconnector(port, true);
-            port.disconnect();
+            // port.disconnect();
         }
     }
     constructor(aMethods, onHandshake) {

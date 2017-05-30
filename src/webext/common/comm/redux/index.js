@@ -64,10 +64,9 @@ function renderProxiedElement(callInReduxPath, component, container, wanted) {
         callInRedux = (method, ...args) => server[method](...args);
     }
 
-    let resolveWithId;
-    let promise = new Promise(resolve => {
-        resolveWithId = resolve;
-        promise = null;
+    let resolveAfterMount; // resolves with unmount function
+    const promise = new Promise(resolve => {
+        resolveAfterMount = val => resolve(val)
     });
 
     let id; // element id
@@ -96,7 +95,7 @@ function renderProxiedElement(callInReduxPath, component, container, wanted) {
                     setState(() => state);
                 };
                 render(<Proxy Component={component} id={id} setSetState={setSetState} dispatch={dispatch} />, container);
-                resolveWithId(id);
+                resolveAfterMount(unmountProxiedElement);
             } else {
                 setState(() => state);
             }
