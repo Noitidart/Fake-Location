@@ -5,33 +5,45 @@ import { pushAlternating } from '../../common/all'
 import { executePageScript } from './utils'
 
 const PAGE_SCRIPT = `
-    function didExtensionShutdown() {
-        var url = '${extension.extension.getURL('~ADDON_SHUTDOWN_WAR~')}';
-        var xhr = new XMLHttpRequest();
-        xhr.responseType = 'text';
+    (function() {
+        var SHUTDOWN_TIMEOUT;
+        window.addEventListener('message', function(e) {
+            switch (e.data) {
+                case '~ADDON_SHUTDOWN_WAR~-from-frame':
+                        console.log('ext is still alive');
+                        clearTimeout(SHUTDOWN_TIMEOUT);
+                        setTimeout(didExtensionShutdown, 1000);
+                    break;
+                // no-default
+            }
+        }, 'message');
 
-        xhr.addEventListener('load', function(e) {
-            // addon is still alive, keep checking
-            setTimeout(didExtensionShutdown, 1000);
-        }, false);
+        function didExtensionShutdown() {
+            window.postMessage('~ADDON_SHUTDOWN_WAR~-from-page', '*');
+            SHUTDOWN_TIMEOUT = setTimeout(extensionShutdown, 1000);
+        }
 
-        xhr.addEventListener('error', function(e) {
-            // ok it shutdown
-            console.log(url, 'extension shutdown!, error:', e);
+        function extensionShutdown() {
+            console.log('EXTENSION DID SHUTDOWN!!');
             var root = document.getElementById('~ADDON_ID~');
             root.parentNode.removeChild(root);
-        }, false);
+        }
 
-        xhr.open('GET', url);
-        xhr.send();
-    }
-
-    didExtensionShutdown();
+        didExtensionShutdown();
+    })();
 `;
 
 class ContentScriptElement extends Component {
     componentDidMount() {
         executePageScript({ code:PAGE_SCRIPT });
+        window.addEventListener('message', function(e) {
+            switch (e.data) {
+                case '~ADDON_SHUTDOWN_WAR~-from-page':
+                        window.postMessage('~ADDON_SHUTDOWN_WAR~-from-frame', '*');
+                    break;
+                // no-default
+            }
+        }, 'message');
     }
     render() {
         let { filter:selected_filter, dispatch } = this.props;
