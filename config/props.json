@@ -5,7 +5,8 @@
             "~ADDON_NAME_HYPH~": "Fake-Location",
             "~ADDON_VERSION~": "2.0",
             "~ADDON_ID~": "@fake-location",
-            "~ADDON_DESC~": "A browser extension to trick websites into thinking you are somewhere else!"
+            "~ADDON_DESC~": "A browser extension to trick websites into thinking you are somewhere else!",
+            "~ADDON_SHUTDOWN_WAR~": "autogened"
         }
     }
 }

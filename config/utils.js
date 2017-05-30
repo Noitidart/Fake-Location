@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 // http://stackoverflow.com/a/32197381/1828637
 function deleteFolderRecursive(path) {
@@ -15,6 +16,21 @@ function deleteFolderRecursive(path) {
   }
 }
 
+function writeFile(path, text) {
+  ensureDirectoryExistence(path);
+  fs.writeFileSync(path, text);
+}
+
+function ensureDirectoryExistence(filePath) {
+  var dirname = path.dirname(filePath);
+  if (fs.existsSync(dirname)) {
+    return true;
+  }
+  ensureDirectoryExistence(dirname);
+  fs.mkdirSync(dirname);
+}
+
 module.exports = {
-    deleteFolderRecursive: deleteFolderRecursive
+    deleteFolderRecursive: deleteFolderRecursive,
+    writeFile: writeFile
 };

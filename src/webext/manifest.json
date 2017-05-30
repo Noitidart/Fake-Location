@@ -51,7 +51,13 @@
         "default_title": "__MSG_browseraction_title__"
     },
 
-    "permissions": ["storage", "webNavigation", "webRequest", "webRequestBlocking", "<all_urls>", "tabs"],
+    "permissions": ["storage", "webNavigation", "webRequest", "webRequestBlocking", "<all_urls>"],
 
-    "web_accessible_resources": ["injectable/index.bundle.js"]
+    "content_scripts": [
+        { "matches":["<all_urls>"], "js":["./contentscript/index.bundle.js"], "all_frames":true }
+    ],
+
+    "web_accessible_resources": [
+        "~ADDON_SHUTDOWN_WAR~"
+    ]
 }
