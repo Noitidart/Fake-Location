@@ -16,7 +16,9 @@ export default class BackgroundElement extends Component {
         return (
             <div>
                 <BrowserAction {...browser_action} dispatch={dispatch} />
-                <FrameScript file="/inject/index.bundle.js" unmountCode="unregister()" updateCode="handleConfigUpdate()" />
+                <FrameScript file="/inject/index.bundle.js" unmountCode="unregister()" updateCode="handleConfigUpdate()" config={{
+                    war: extension.extension.getURL('injectable/index.bundle.js')
+                }} />
             </div>
         )
     }

@@ -21,12 +21,12 @@ renderProxiedElement(gReduxServer, BackgroundElement, document.getElementById('r
     'browser_action',
     'core'
 ], true)
-.then(unmount => {
-    window.addEventListener('unload', () => {
-        console.error('doing unload from bg');
-        unmount();
-    }, true)
-} ); // to trigger the uninit of FrameScript
+// .then(unmount => {
+//     window.addEventListener('unload', () => {
+//         console.error('doing unload from bg');
+//         unmount();
+//     }, true);
+// } ); // to trigger the uninit of FrameScript
 
 
 export function logIt(what) {

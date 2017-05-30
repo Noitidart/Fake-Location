@@ -1,11 +1,34 @@
-import '../common/extension-polyfill'
+/*global config*/
 
-var config; // << injected
+import '../common/extension-polyfill'
+// import { Client as PortsClient } from '../common/comm/webext-ports'
+// import { callInTemplate } from '../common/comm/comm'
+
+// const gBgComm = new PortsClient(exports, 'frame-script');
+// const port = gBgComm.getPort();
+
+// gBgComm.onUnregister.addListener(function() {
+//     console.error('frame-script unregistered!!');
+// });
+// export const callInBackground = callInTemplate.bind(null, gBgComm, null, null); // add to methods so so gFrameComm can call it
+// callInBackground('logIt', 'rawwwwrw');
+// gBgComm.sendMessage
+
+// function logIt() {
+//     port.postMessage('IGNORE');
+//     setTimeout(logIt, 1000);
+// }
+// logIt();
+
+// var config; // << injected
 
 alert('registered');
-executeScript({
-    file:'./injectable/index.bundle.js'
-});
+executeScript({code:'config = ' + JSON.stringify(config)});
+executeScript({file:'./injectable/index.bundle.js'});
+
+window.addEventListener('unload', function() {
+    console.log('framescript-dying');
+}, true);
 
 window.unregister = function() {
     alert('unregistered');
